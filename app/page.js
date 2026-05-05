@@ -5,19 +5,15 @@ import { useEffect, useMemo, useState } from "react";
 const HERO_SLIDES = [
   {
     id: 1,
-    image: "https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/123bd5a0-9d16-4c28-9aff-2d705d6e5a2d.png",
-    alt: "SIV futuristic workflow hero showing idea input, AI analysis, and action outputs",
-    eyebrow: "SIV // SaaS Idea Validator",
-    title: "Validate Faster. Decide Smarter.",
-    text: "Drop in a SaaS idea and SIV turns rough concepts into structured signals, opportunity scores, and next-step decisions.",
+    image:
+      "https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/123bd5a0-9d16-4c28-9aff-2d705d6e5a2d.png",
+    alt: "SIV futuristic workflow banner showing idea input, AI analysis, and action outputs",
   },
   {
     id: 2,
-    image: "https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/494d2541-9c72-42c4-be59-8da7d92444ab.png",
-    alt: "SIV upload and dashboard hero showing drag-and-drop, AI validation, score dashboard, and decision workflow",
-    eyebrow: "SIV // Upload To Insight",
-    title: "From Files To Founder Clarity.",
-    text: "Upload notes, screenshots, or documents and SIV converts them into a premium dashboard built for fast product judgment.",
+    image:
+      "https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/494d2541-9c72-42c4-be59-8da7d92444ab.png",
+    alt: "SIV upload and dashboard banner showing drag and drop, AI validation, score dashboard, and decision workflow",
   },
 ];
 
@@ -60,17 +56,18 @@ export default function HomePage() {
   const [submitted, setSubmitted] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [uploadedName, setUploadedName] = useState("");
+  const [autoplayPaused, setAutoplayPaused] = useState(false);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (mediaQuery.matches) return;
+    if (mediaQuery.matches || autoplayPaused) return;
 
     const timer = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % HERO_SLIDES.length);
-    }, 4500);
+    }, 5000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [autoplayPaused]);
 
   const analysis = useMemo(() => {
     const text = idea.trim().toLowerCase();
@@ -98,19 +95,19 @@ export default function HomePage() {
       feasibility,
       monetization,
       insights: [
-        "SIV helps founders turn raw ideas into structured signals before they overbuild.",
-        "The app is useful because it reduces vague thinking and makes next steps visible immediately.",
-        "Uploading source material gives the validation engine more context and sharper output.",
+        "SIV turns raw founder thinking into a clearer product signal before time gets wasted on weak execution paths.",
+        "The app is useful because it compresses ideation, evaluation, and decision-making into one fast workflow.",
+        "Uploading supporting files gives the validator more context and makes the recommendations stronger.",
       ],
       workflow: [
-        "Enter a SaaS idea or upload source material.",
-        "SIV analyzes demand, feasibility, monetization, and defensibility.",
-        "You get a score, workflow guidance, and action-ready next steps.",
+        "Enter a SaaS idea or drag in supporting material.",
+        "SIV evaluates opportunity, build fit, monetization, and defensibility.",
+        "You get a score, guidance, and a next-step decision path you can act on immediately.",
       ],
       actions: [
-        "Sharpen the audience and pain point first.",
-        "Test pricing and desirability before adding features.",
-        "Use the score dashboard to decide whether to refine, pivot, or build.",
+        "Tighten the audience and pain point statement.",
+        "Test willingness to pay before feature expansion.",
+        "Use the score panel to decide whether to refine, pivot, or build.",
       ],
     };
   }, [idea, uploadedName]);
@@ -171,6 +168,9 @@ export default function HomePage() {
       <section
         className="siv-hero-carousel cyber-hero-card cyber-corner-cut"
         aria-label="SIV hero carousel"
+        aria-roledescription="carousel"
+        onMouseEnter={() => setAutoplayPaused(true)}
+        onMouseLeave={() => setAutoplayPaused(false)}
       >
         <div className="cyber-grid-lines" />
         <div className="cyber-noise" />
@@ -181,48 +181,41 @@ export default function HomePage() {
             alt={currentSlide.alt}
             className="siv-hero-image"
           />
-          <div className="siv-hero-overlay" />
-        </div>
-
-        <div className="siv-hero-content">
-          <div className="cyber-kicker">{currentSlide.eyebrow}</div>
-          <h1 className="cyber-hero-title">{currentSlide.title}</h1>
-          <p className="cyber-subtitle">{currentSlide.text}</p>
-
-          <div className="cyber-pill-row">
-            <span className="cyber-pill">Idea Input</span>
-            <span className="cyber-pill">AI Analysis</span>
-            <span className="cyber-pill">Score Dashboard</span>
-            <span className="cyber-pill">Action Steps</span>
-          </div>
-
-          <div className="siv-carousel-dots" role="tablist" aria-label="Hero slides">
-            {HERO_SLIDES.map((slide, index) => (
-              <button
-                key={slide.id}
-                type="button"
-                role="tab"
-                aria-selected={activeSlide === index}
-                aria-label={`Show slide ${index + 1}`}
-                className={`siv-dot ${activeSlide === index ? "is-active" : ""}`}
-                onClick={() => setActiveSlide(index)}
-              />
-            ))}
-          </div>
         </div>
 
         <div className="cyber-holo-line" />
       </section>
 
+      <div
+        className="siv-carousel-dots"
+        role="tablist"
+        aria-label="Hero slide navigation"
+      >
+        {HERO_SLIDES.map((slide, index) => (
+          <button
+            key={slide.id}
+            type="button"
+            role="tab"
+            aria-selected={activeSlide === index}
+            aria-label={`Show slide ${index + 1}`}
+            className={`siv-dot ${activeSlide === index ? "is-active" : ""}`}
+            onClick={() => {
+              setActiveSlide(index);
+              setAutoplayPaused(true);
+            }}
+          />
+        ))}
+      </div>
+
       <section className="siv-explainer">
         <div className="siv-explainer-copy">
-          <div className="cyber-kicker">Why founders use SIV</div>
-          <h2 className="siv-section-display">
-            Turn fuzzy product ideas into premium execution decisions.
-          </h2>
+          <div className="cyber-kicker">SIV // Founder Workflow Intelligence</div>
+          <h1 className="siv-section-display">
+            Validate SaaS ideas with a neon-fast decision workflow.
+          </h1>
           <p className="cyber-subtitle">
-            SIV makes early-stage product thinking clearer by showing a simple visual workflow:
-            capture the idea, validate the opportunity, review the score, and act with confidence.
+            SIV helps founders understand whether an idea deserves refinement, testing,
+            or execution by turning rough inputs into clear visual reasoning.
           </p>
         </div>
 
@@ -239,6 +232,7 @@ export default function HomePage() {
               <div className="siv-arrow">→</div>
               <div className="siv-node">4. Decide</div>
             </div>
+
             <div className="cyber-divider" />
             <InsightList items={analysis.workflow} />
           </div>
@@ -254,14 +248,14 @@ export default function HomePage() {
             <div className="cyber-panel-inner">
               <div className="cyber-section-title">Input Console</div>
               <p className="cyber-muted">
-                Paste your SaaS idea below or upload a file for deeper validation context.
+                Paste your SaaS idea below or upload a file for stronger validation context.
               </p>
 
               <div className="cyber-divider" />
 
               <textarea
                 className="cyber-textarea"
-                placeholder="Example: An AI tool that helps solo founders validate SaaS ideas, compare pricing angles, and generate actionable launch plans..."
+                placeholder="Example: An AI tool that helps solo founders validate SaaS ideas, compare pricing angles, and generate launch-ready action steps..."
                 value={idea}
                 onChange={(e) => setIdea(e.target.value)}
               />
@@ -312,15 +306,18 @@ export default function HomePage() {
               <div className="cyber-chart-inner">
                 <div className="cyber-section-title">Validation Response</div>
                 <p className="cyber-muted">
-                  This result appears directly under the input area so the workflow stays simple and focused.
+                  Your result appears directly underneath the input area to keep the workflow focused and easy to follow.
                 </p>
 
                 <div className="cyber-divider" />
 
                 <div className="siv-score-summary">
-                  <div className="cyber-score-ring" style={{
-                    background: `radial-gradient(circle at center, rgba(5,8,22,0.95) 0 53%, transparent 54%), conic-gradient(var(--cyan) 0 ${analysis.score}%, rgba(255,255,255,0.08) ${analysis.score}% 100%)`
-                  }}>
+                  <div
+                    className="cyber-score-ring"
+                    style={{
+                      background: `radial-gradient(circle at center, rgba(5,8,22,0.95) 0 53%, transparent 54%), conic-gradient(var(--cyan) 0 ${analysis.score}%, rgba(255,255,255,0.08) ${analysis.score}% 100%)`,
+                    }}
+                  >
                     <div className="cyber-score-value">
                       {analysis.score}
                       <span className="cyber-score-caption">Overall</span>
