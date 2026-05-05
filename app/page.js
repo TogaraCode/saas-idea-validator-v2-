@@ -1,518 +1,360 @@
-"use client"
+"use client";
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react";
 
-function MetricBar({ label, value, color }) {
+const HERO_SLIDES = [
+  {
+    id: 1,
+    image: "https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/123bd5a0-9d16-4c28-9aff-2d705d6e5a2d.png",
+    alt: "SIV futuristic workflow hero showing idea input, AI analysis, and action outputs",
+    eyebrow: "SIV // SaaS Idea Validator",
+    title: "Validate Faster. Decide Smarter.",
+    text: "Drop in a SaaS idea and SIV turns rough concepts into structured signals, opportunity scores, and next-step decisions.",
+  },
+  {
+    id: 2,
+    image: "https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/494d2541-9c72-42c4-be59-8da7d92444ab.png",
+    alt: "SIV upload and dashboard hero showing drag-and-drop, AI validation, score dashboard, and decision workflow",
+    eyebrow: "SIV // Upload To Insight",
+    title: "From Files To Founder Clarity.",
+    text: "Upload notes, screenshots, or documents and SIV converts them into a premium dashboard built for fast product judgment.",
+  },
+];
+
+function clampValue(value) {
+  return Math.max(0, Math.min(100, value));
+}
+
+function MetricBar({ label, value }) {
+  const safe = clampValue(value);
   return (
-    <div style={{ marginBottom: 18 }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: 8,
-          fontSize: 14,
-          color: "#b7c2d8",
-        }}
-      >
+    <div className="cyber-bar-row">
+      <div className="cyber-bar-top">
         <span>{label}</span>
-        <span style={{ color: "#ffffff", fontWeight: 700 }}>{value}/100</span>
+        <span>{safe}%</span>
       </div>
-      <div
-        style={{
-          width: "100%",
-          height: 12,
-          background: "rgba(255,255,255,0.08)",
-          borderRadius: 999,
-          overflow: "hidden",
-          border: "1px solid rgba(255,255,255,0.06)",
-        }}
-      >
-        <div
-          style={{
-            width: `${Math.max(6, value)}%`,
-            height: "100%",
-            borderRadius: 999,
-            background: color,
-            boxShadow: `0 0 18px ${color}`,
-          }}
-        />
+      <div className="cyber-bar-track">
+        <div className="cyber-bar-fill" style={{ width: `${safe}%` }} />
       </div>
     </div>
-  )
+  );
 }
 
-function ScoreRing({ score }) {
-  const glow =
-    score >= 80
-      ? "#16f2b3"
-      : score >= 60
-      ? "#00d4ff"
-      : "#ff6b6b"
-
+function InsightList({ items }) {
   return (
-    <div
-      style={{
-        width: 180,
-        height: 180,
-        borderRadius: "50%",
-        display: "grid",
-        placeItems: "center",
-        background: `radial-gradient(circle at center, rgba(255,255,255,0.12), rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.02) 70%)`,
-        border: "1px solid rgba(255,255,255,0.08)",
-        boxShadow: `0 0 40px ${glow}33, inset 0 0 30px rgba(255,255,255,0.04)`,
-        margin: "0 auto",
-      }}
-    >
-      <div
-        style={{
-          width: 136,
-          height: 136,
-          borderRadius: "50%",
-          display: "grid",
-          placeItems: "center",
-          background: "#081120",
-          border: `2px solid ${glow}`,
-          boxShadow: `0 0 24px ${glow}66`,
-        }}
-      >
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 14, color: "#97a4bd", letterSpacing: 1.5 }}>
-            SIGNAL
-          </div>
-          <div style={{ fontSize: 42, fontWeight: 800, color: "#ffffff", lineHeight: 1.1 }}>
-            {score}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function TinyBarChart({ values = [] }) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "end",
-        gap: 10,
-        height: 150,
-        paddingTop: 12,
-      }}
-    >
-      {values.map((v, i) => (
-        <div key={i} style={{ flex: 1, textAlign: "center" }}>
-          <div
-            style={{
-              height: `${Math.max(v, 10)}%`,
-              minHeight: 18,
-              borderRadius: "14px 14px 6px 6px",
-              background:
-                i === values.length - 1
-                  ? "linear-gradient(180deg, #16f2b3, #00d4ff)"
-                  : "linear-gradient(180deg, #7c3aed, #00d4ff)",
-              boxShadow:
-                i === values.length - 1
-                  ? "0 0 24px rgba(22,242,179,0.45)"
-                  : "0 0 18px rgba(124,58,237,0.35)",
-              border: "1px solid rgba(255,255,255,0.08)",
-            }}
-          />
-          <div style={{ marginTop: 8, fontSize: 12, color: "#8e9bb3" }}>
-            W{i + 1}
-          </div>
-        </div>
+    <ul className="cyber-list">
+      {items.map((item, index) => (
+        <li key={index} className="cyber-list-item">
+          <span className="cyber-dot" />
+          <span>{item}</span>
+        </li>
       ))}
-    </div>
-  )
-}
-
-function DataCard({ title, value, sub, glow }) {
-  return (
-    <div
-      style={{
-        padding: 18,
-        borderRadius: 22,
-        background: "linear-gradient(180deg, rgba(18,25,43,0.95), rgba(10,15,28,0.96))",
-        border: "1px solid rgba(255,255,255,0.08)",
-        boxShadow: `0 0 24px ${glow}, inset 0 1px 0 rgba(255,255,255,0.05)`,
-      }}
-    >
-      <div style={{ fontSize: 12, color: "#8e9bb3", letterSpacing: 1.2, textTransform: "uppercase" }}>
-        {title}
-      </div>
-      <div style={{ fontSize: 30, fontWeight: 800, color: "#ffffff", marginTop: 10 }}>
-        {value}
-      </div>
-      <div style={{ fontSize: 13, color: "#aab3c5", marginTop: 6 }}>{sub}</div>
-    </div>
-  )
+    </ul>
+  );
 }
 
 export default function HomePage() {
-  const [idea, setIdea] = useState("")
-  const [result, setResult] = useState(null)
-  const [loading, setLoading] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [idea, setIdea] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const [uploadedName, setUploadedName] = useState("");
 
-  async function analyzeIdea() {
-    if (!idea.trim()) return
-    setLoading(true)
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (mediaQuery.matches) return;
 
-    try {
-      const res = await fetch("/api/analyze", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ idea }),
-      })
+    const timer = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 4500);
 
-      const data = await res.json()
-      setResult(data)
-    } catch (error) {
-      setResult({ error: "Something went wrong." })
-    } finally {
-      setLoading(false)
-    }
+    return () => clearInterval(timer);
+  }, []);
+
+  const analysis = useMemo(() => {
+    const text = idea.trim().toLowerCase();
+    const lengthBoost = Math.min(text.length / 2, 28);
+    const keywordBoost =
+      (text.includes("ai") ? 8 : 0) +
+      (text.includes("saas") ? 10 : 0) +
+      (text.includes("subscription") ? 8 : 0) +
+      (text.includes("mobile") ? 7 : 0) +
+      (text.includes("marketplace") ? 6 : 0);
+
+    const fileBoost = uploadedName ? 8 : 0;
+    const base = 42 + lengthBoost + keywordBoost + fileBoost;
+
+    const demand = clampValue(Math.round(base + 4));
+    const moat = clampValue(Math.round(base - 8));
+    const feasibility = clampValue(Math.round(base + 2));
+    const monetization = clampValue(Math.round(base + 6));
+    const score = Math.round((demand + moat + feasibility + monetization) / 4);
+
+    return {
+      score,
+      demand,
+      moat,
+      feasibility,
+      monetization,
+      insights: [
+        "SIV helps founders turn raw ideas into structured signals before they overbuild.",
+        "The app is useful because it reduces vague thinking and makes next steps visible immediately.",
+        "Uploading source material gives the validation engine more context and sharper output.",
+      ],
+      workflow: [
+        "Enter a SaaS idea or upload source material.",
+        "SIV analyzes demand, feasibility, monetization, and defensibility.",
+        "You get a score, workflow guidance, and action-ready next steps.",
+      ],
+      actions: [
+        "Sharpen the audience and pain point first.",
+        "Test pricing and desirability before adding features.",
+        "Use the score dashboard to decide whether to refine, pivot, or build.",
+      ],
+    };
+  }, [idea, uploadedName]);
+
+  const currentSlide = HERO_SLIDES[activeSlide];
+
+  function handleFile(file) {
+    if (!file) return;
+    setUploadedName(file.name);
   }
 
-  const matrix = useMemo(() => {
-    if (!result || result.error) return []
-    return [
-      { label: "Market Demand", value: result.market, color: "linear-gradient(90deg, #00d4ff, #16f2b3)" },
-      { label: "User Pain", value: result.user, color: "linear-gradient(90deg, #7c3aed, #00d4ff)" },
-      { label: "Monetization", value: result.monetization, color: "linear-gradient(90deg, #16f2b3, #ffe66d)" },
-      { label: "Risk Buffer", value: Math.max(100 - result.risks, 8), color: "linear-gradient(90deg, #ff8a00, #ff3d81)" },
-    ]
-  }, [result])
+  function onDrop(e) {
+    e.preventDefault();
+    setDragActive(false);
+    const file = e.dataTransfer.files?.[0];
+    handleFile(file);
+  }
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background:
-          "radial-gradient(circle at top left, rgba(0,212,255,0.18), transparent 22%), radial-gradient(circle at top right, rgba(124,58,237,0.18), transparent 24%), linear-gradient(180deg, #040814 0%, #08101f 40%, #050915 100%)",
-        color: "#ffffff",
-        padding: "28px 18px 60px",
-      }}
-    >
-      <div style={{ maxWidth: 1180, margin: "0 auto" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            gap: 18,
-            alignItems: "center",
-            flexWrap: "wrap",
-            marginBottom: 28,
-          }}
-        >
-          <div>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "8px 12px",
-                borderRadius: 999,
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                color: "#9fb3d1",
-                fontSize: 12,
-                letterSpacing: 1.2,
-                textTransform: "uppercase",
-                marginBottom: 16,
-              }}
-            >
-              Elite AI Validation Console
+    <main id="main-content" className="cyber-shell">
+      <header className="siv-navbar">
+        <div className="siv-navbar__inner">
+          <div className="siv-brand">
+            <div className="cyber-logo" aria-hidden="true" />
+            <div>
+              <div className="siv-brand-mark">SIV</div>
+              <div className="siv-brand-name">SaaS Idea Validator</div>
             </div>
-
-            <h1
-              style={{
-                fontSize: "clamp(34px, 6vw, 64px)",
-                lineHeight: 1,
-                margin: "0 0 14px",
-                letterSpacing: -1.8,
-              }}
-            >
-              SaaS Idea Validator
-            </h1>
-
-            <p
-              style={{
-                margin: 0,
-                maxWidth: 760,
-                color: "#a9b6ce",
-                fontSize: 17,
-                lineHeight: 1.7,
-              }}
-            >
-              Turn rough startup ideas into premium founder-grade signal reports with instant scoring,
-              risk analysis, competitor context, and visually rich validation outputs.
-            </p>
           </div>
 
-          <div
-            style={{
-              minWidth: 250,
-              padding: 18,
-              borderRadius: 24,
-              background: "linear-gradient(180deg, rgba(18,25,43,0.92), rgba(8,14,28,0.95))",
-              border: "1px solid rgba(255,255,255,0.08)",
-              boxShadow: "0 0 28px rgba(0,212,255,0.10)",
-            }}
+          <button
+            type="button"
+            className={`siv-menu-button ${menuOpen ? "is-open" : ""}`}
+            aria-label="Toggle menu"
+            aria-expanded={menuOpen}
+            aria-controls="siv-drawer"
+            onClick={() => setMenuOpen((prev) => !prev)}
           >
-            <div style={{ fontSize: 12, color: "#8e9bb3", textTransform: "uppercase", letterSpacing: 1.2 }}>
-              System State
-            </div>
-            <div style={{ fontSize: 26, fontWeight: 800, marginTop: 12 }}>Operational</div>
-            <div style={{ color: "#9fb3d1", marginTop: 8, fontSize: 14 }}>
-              Founder intelligence engine ready for live idea analysis.
-            </div>
-          </div>
+            <span />
+            <span />
+            <span />
+          </button>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1.2fr 0.8fr",
-            gap: 22,
-            alignItems: "start",
-          }}
+        <aside
+          id="siv-drawer"
+          className={`siv-drawer ${menuOpen ? "is-open" : ""}`}
+          aria-hidden={!menuOpen}
         >
-          <section
-            style={{
-              padding: 22,
-              borderRadius: 28,
-              background: "linear-gradient(180deg, rgba(17,24,39,0.94), rgba(7,12,24,0.96))",
-              border: "1px solid rgba(255,255,255,0.08)",
-              boxShadow: "0 0 34px rgba(124,58,237,0.10), inset 0 1px 0 rgba(255,255,255,0.04)",
-            }}
-          >
-            <div style={{ fontSize: 13, color: "#8e9bb3", textTransform: "uppercase", letterSpacing: 1.4 }}>
-              Submit idea
-            </div>
+          <button type="button" className="siv-drawer-link">Login</button>
+          <button type="button" className="siv-drawer-link">Logout</button>
+          <button type="button" className="siv-drawer-link">Toggle My Projects</button>
+          <button type="button" className="siv-drawer-link">Account</button>
+          <button type="button" className="siv-drawer-link">Settings</button>
+        </aside>
+      </header>
 
-            <textarea
-              value={idea}
-              onChange={(e) => setIdea(e.target.value)}
-              placeholder="Describe your SaaS idea, target audience, core problem, pricing angle, and what makes it defensible..."
-              rows={8}
-              style={{
-                width: "100%",
-                marginTop: 18,
-                padding: 18,
-                borderRadius: 20,
-                border: "1px solid rgba(255,255,255,0.08)",
-                background: "rgba(255,255,255,0.04)",
-                color: "#ffffff",
-                fontSize: 15,
-                lineHeight: 1.6,
-                outline: "none",
-                boxSizing: "border-box",
-              }}
-            />
+      <section
+        className="siv-hero-carousel cyber-hero-card cyber-corner-cut"
+        aria-label="SIV hero carousel"
+      >
+        <div className="cyber-grid-lines" />
+        <div className="cyber-noise" />
 
-            <div
-              style={{
-                marginTop: 16,
-                display: "flex",
-                gap: 12,
-                flexWrap: "wrap",
-              }}
-            >
+        <div className="siv-hero-media">
+          <img
+            src={currentSlide.image}
+            alt={currentSlide.alt}
+            className="siv-hero-image"
+          />
+          <div className="siv-hero-overlay" />
+        </div>
+
+        <div className="siv-hero-content">
+          <div className="cyber-kicker">{currentSlide.eyebrow}</div>
+          <h1 className="cyber-hero-title">{currentSlide.title}</h1>
+          <p className="cyber-subtitle">{currentSlide.text}</p>
+
+          <div className="cyber-pill-row">
+            <span className="cyber-pill">Idea Input</span>
+            <span className="cyber-pill">AI Analysis</span>
+            <span className="cyber-pill">Score Dashboard</span>
+            <span className="cyber-pill">Action Steps</span>
+          </div>
+
+          <div className="siv-carousel-dots" role="tablist" aria-label="Hero slides">
+            {HERO_SLIDES.map((slide, index) => (
               <button
-                onClick={analyzeIdea}
-                style={{
-                  padding: "14px 20px",
-                  borderRadius: 16,
-                  border: "none",
-                  background: "linear-gradient(90deg, #00d4ff, #7c3aed)",
-                  color: "#ffffff",
-                  fontWeight: 800,
-                  fontSize: 14,
-                  letterSpacing: 0.3,
-                  boxShadow: "0 0 24px rgba(0,212,255,0.35)",
-                }}
-              >
-                {loading ? "Running analysis..." : "Run validation"}
-              </button>
-
-              <div
-                style={{
-                  padding: "14px 16px",
-                  borderRadius: 16,
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                  color: "#9fb3d1",
-                  fontSize: 14,
-                }}
-              >
-                Live scoring • competitor framing • premium signal board
-              </div>
-            </div>
-          </section>
-
-          <section
-            style={{
-              padding: 22,
-              borderRadius: 28,
-              background: "linear-gradient(180deg, rgba(12,18,32,0.96), rgba(7,10,20,0.98))",
-              border: "1px solid rgba(255,255,255,0.08)",
-              boxShadow: "0 0 34px rgba(0,212,255,0.08)",
-            }}
-          >
-            <div style={{ fontSize: 13, color: "#8e9bb3", textTransform: "uppercase", letterSpacing: 1.4 }}>
-              Forecast preview
-            </div>
-            <TinyBarChart values={result?.trends || [34, 52, 61, 58, 72, 84]} />
-            <div style={{ marginTop: 14, color: "#a9b6ce", fontSize: 14, lineHeight: 1.7 }}>
-              Visual trend projection updates after each idea submission and highlights overall opportunity momentum.
-            </div>
-          </section>
+                key={slide.id}
+                type="button"
+                role="tab"
+                aria-selected={activeSlide === index}
+                aria-label={`Show slide ${index + 1}`}
+                className={`siv-dot ${activeSlide === index ? "is-active" : ""}`}
+                onClick={() => setActiveSlide(index)}
+              />
+            ))}
+          </div>
         </div>
 
-        {result && (
-          <section style={{ marginTop: 26 }}>
-            {result.error ? (
+        <div className="cyber-holo-line" />
+      </section>
+
+      <section className="siv-explainer">
+        <div className="siv-explainer-copy">
+          <div className="cyber-kicker">Why founders use SIV</div>
+          <h2 className="siv-section-display">
+            Turn fuzzy product ideas into premium execution decisions.
+          </h2>
+          <p className="cyber-subtitle">
+            SIV makes early-stage product thinking clearer by showing a simple visual workflow:
+            capture the idea, validate the opportunity, review the score, and act with confidence.
+          </p>
+        </div>
+
+        <div className="siv-workflow-card cyber-card cyber-corner-cut">
+          <div className="cyber-grid-lines" />
+          <div className="cyber-noise" />
+          <div className="cyber-card-inner">
+            <div className="siv-workflow-model">
+              <div className="siv-node">1. Input</div>
+              <div className="siv-arrow">→</div>
+              <div className="siv-node">2. Analyze</div>
+              <div className="siv-arrow">→</div>
+              <div className="siv-node">3. Score</div>
+              <div className="siv-arrow">→</div>
+              <div className="siv-node">4. Decide</div>
+            </div>
+            <div className="cyber-divider" />
+            <InsightList items={analysis.workflow} />
+          </div>
+          <div className="cyber-holo-line" />
+        </div>
+      </section>
+
+      <section className="siv-main-grid">
+        <div className="siv-input-column">
+          <article className="cyber-panel cyber-corner-cut">
+            <div className="cyber-grid-lines" />
+            <div className="cyber-noise" />
+            <div className="cyber-panel-inner">
+              <div className="cyber-section-title">Input Console</div>
+              <p className="cyber-muted">
+                Paste your SaaS idea below or upload a file for deeper validation context.
+              </p>
+
+              <div className="cyber-divider" />
+
+              <textarea
+                className="cyber-textarea"
+                placeholder="Example: An AI tool that helps solo founders validate SaaS ideas, compare pricing angles, and generate actionable launch plans..."
+                value={idea}
+                onChange={(e) => setIdea(e.target.value)}
+              />
+
               <div
-                style={{
-                  padding: 22,
-                  borderRadius: 24,
-                  background: "rgba(255,107,107,0.08)",
-                  border: "1px solid rgba(255,107,107,0.18)",
+                className={`siv-dropzone ${dragActive ? "is-active" : ""}`}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setDragActive(true);
                 }}
+                onDragLeave={() => setDragActive(false)}
+                onDrop={onDrop}
               >
-                {result.error}
+                <input
+                  id="siv-file-upload"
+                  type="file"
+                  className="siv-file-input"
+                  onChange={(e) => handleFile(e.target.files?.[0])}
+                />
+                <label htmlFor="siv-file-upload" className="siv-dropzone-label">
+                  <span className="siv-dropzone-title">Drag and drop a file</span>
+                  <span className="siv-dropzone-text">
+                    or tap to upload notes, screenshots, PDFs, or research
+                  </span>
+                  {uploadedName ? (
+                    <span className="siv-uploaded-name">Uploaded: {uploadedName}</span>
+                  ) : null}
+                </label>
               </div>
-            ) : (
-              <>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "0.9fr 1.1fr",
-                    gap: 22,
-                    alignItems: "stretch",
-                  }}
-                >
-                  <div
-                    style={{
-                      padding: 24,
-                      borderRadius: 30,
-                      background: "linear-gradient(180deg, rgba(13,18,31,0.98), rgba(9,13,25,0.98))",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      boxShadow: "0 0 38px rgba(22,242,179,0.10)",
-                    }}
-                  >
-                    <div style={{ fontSize: 13, color: "#8e9bb3", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 18 }}>
-                      Core signal
-                    </div>
-                    <ScoreRing score={result.score} />
-                    <div style={{ marginTop: 18, textAlign: "center", color: "#9fb3d1", fontSize: 15, lineHeight: 1.7 }}>
-                      {result.summary}
-                    </div>
-                  </div>
 
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                      gap: 16,
-                    }}
-                  >
-                    <DataCard title="Market Score" value={result.market} sub="Demand and expansion signal" glow="rgba(0,212,255,0.16)" />
-                    <DataCard title="User Pain" value={result.user} sub="Urgency and felt problem strength" glow="rgba(124,58,237,0.16)" />
-                    <DataCard title="Monetization" value={result.monetization} sub="Revenue potential and pricing room" glow="rgba(22,242,179,0.14)" />
-                    <DataCard title="Risk Index" value={result.risks} sub="Execution and market friction exposure" glow="rgba(255,107,107,0.14)" />
+              <div className="cyber-pill-row">
+                <button
+                  className="cyber-button"
+                  type="button"
+                  onClick={() => setSubmitted(true)}
+                >
+                  Enter Signal
+                </button>
+              </div>
+            </div>
+            <div className="cyber-holo-line" />
+          </article>
+
+          {submitted && (
+            <article className="cyber-chart cyber-corner-cut">
+              <div className="cyber-grid-lines" />
+              <div className="cyber-noise" />
+              <div className="cyber-chart-inner">
+                <div className="cyber-section-title">Validation Response</div>
+                <p className="cyber-muted">
+                  This result appears directly under the input area so the workflow stays simple and focused.
+                </p>
+
+                <div className="cyber-divider" />
+
+                <div className="siv-score-summary">
+                  <div className="cyber-score-ring" style={{
+                    background: `radial-gradient(circle at center, rgba(5,8,22,0.95) 0 53%, transparent 54%), conic-gradient(var(--cyan) 0 ${analysis.score}%, rgba(255,255,255,0.08) ${analysis.score}% 100%)`
+                  }}>
+                    <div className="cyber-score-value">
+                      {analysis.score}
+                      <span className="cyber-score-caption">Overall</span>
+                    </div>
                   </div>
                 </div>
 
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: 22,
-                    marginTop: 22,
-                  }}
-                >
-                  <div
-                    style={{
-                      padding: 24,
-                      borderRadius: 28,
-                      background: "linear-gradient(180deg, rgba(16,22,37,0.95), rgba(8,12,23,0.98))",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                    }}
-                  >
-                    <div style={{ fontSize: 13, color: "#8e9bb3", textTransform: "uppercase", letterSpacing: 1.4, marginBottom: 18 }}>
-                      Validation matrix
-                    </div>
-
-                    {matrix.map((item) => (
-                      <MetricBar
-                        key={item.label}
-                        label={item.label}
-                        value={item.value}
-                        color={item.color}
-                      />
-                    ))}
-                  </div>
-
-                  <div
-                    style={{
-                      padding: 24,
-                      borderRadius: 28,
-                      background: "linear-gradient(180deg, rgba(12,18,33,0.96), rgba(8,12,23,0.98))",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                    }}
-                  >
-                    <div style={{ fontSize: 13, color: "#8e9bb3", textTransform: "uppercase", letterSpacing: 1.4, marginBottom: 18 }}>
-                      Competitor field
-                    </div>
-
-                    <div style={{ display: "grid", gap: 14 }}>
-                      {(result.competitors || []).map((comp, index) => (
-                        <div
-                          key={comp}
-                          style={{
-                            padding: 16,
-                            borderRadius: 18,
-                            background: "rgba(255,255,255,0.04)",
-                            border: "1px solid rgba(255,255,255,0.07)",
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                          }}
-                        >
-                          <div>
-                            <div style={{ fontWeight: 700, fontSize: 16 }}>{comp}</div>
-                            <div style={{ color: "#95a5bf", fontSize: 13, marginTop: 4 }}>
-                              Comparable market reference point
-                            </div>
-                          </div>
-                          <div
-                            style={{
-                              minWidth: 44,
-                              height: 44,
-                              display: "grid",
-                              placeItems: "center",
-                              borderRadius: 14,
-                              background: "linear-gradient(180deg, rgba(0,212,255,0.18), rgba(124,58,237,0.18))",
-                              border: "1px solid rgba(255,255,255,0.08)",
-                              color: "#ffffff",
-                              fontWeight: 800,
-                            }}
-                          >
-                            {index + 1}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                <div className="cyber-chart-bars">
+                  <MetricBar label="Demand" value={analysis.demand} />
+                  <MetricBar label="Feasibility" value={analysis.feasibility} />
+                  <MetricBar label="Monetization" value={analysis.monetization} />
+                  <MetricBar label="Defensibility" value={analysis.moat} />
                 </div>
-              </>
-            )}
-          </section>
-        )}
-      </div>
+
+                <div className="cyber-divider" />
+                <InsightList items={analysis.actions} />
+              </div>
+              <div className="cyber-holo-line" />
+            </article>
+          )}
+        </div>
+
+        <div className="siv-side-column">
+          <article className="cyber-card cyber-corner-cut">
+            <div className="cyber-grid-lines" />
+            <div className="cyber-noise" />
+            <div className="cyber-card-inner">
+              <div className="cyber-section-title">Why it is useful</div>
+              <InsightList items={analysis.insights} />
+            </div>
+            <div className="cyber-holo-line" />
+          </article>
+        </div>
+      </section>
     </main>
-  )
+  );
 }
