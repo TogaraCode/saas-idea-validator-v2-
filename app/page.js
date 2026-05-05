@@ -70,7 +70,7 @@ function InsightList({ items }) {
   return (
     <ul className="cyber-list">
       {items.map((item, index) => (
-        >,
+        >
           <span className="cyber-dot" />
           <span>{item}</span>
         </li>
