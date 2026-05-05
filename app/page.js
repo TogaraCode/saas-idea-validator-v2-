@@ -34,11 +34,11 @@ const MOBILE_DIAGRAMS = [
             <stop offset="100%" stopColor="#10263f" />
           </radialGradient>
         </defs>
-        ircle cx="60" cy="60" r="22" fill="url(#scanCore)" />
-        ircle cx="60" cy="60" r="34" className="sa-orbit-line" />
-        ircle cx="60" cy="60" r="48" className="sa-orbit-line sa-orbit-line--faint" />
+        <circle cx="60" cy="60" r="22" fill="url(#scanCore)" />
+        <circle cx="60" cy="60" r="34" className="sa-orbit-line" />
+        <circle cx="60" cy="60" r="48" className="sa-orbit-line sa-orbit-line--faint" />
         <path d="M60 12 A48 48 0 0 1 108 60" className="sa-scan-sweep" />
-        ircle cx="92" cy="34" r="4" className="sa-scan-dot" />
+        <circle cx="92" cy="34" r="4" className="sa-scan-dot" />
       </svg>
     ),
   },
@@ -54,10 +54,10 @@ const MOBILE_DIAGRAMS = [
         <path d="M24 38 L60 18 L96 38 L60 58 Z" className="sa-iso-top" />
         <path d="M24 38 L24 78 L60 98 L60 58 Z" className="sa-iso-left" />
         <path d="M96 38 L96 78 L60 98 L60 58 Z" className="sa-iso-right" />
-        ircle cx="60" cy="58" r="7" className="sa-core-node" />
-        ircle cx="43" cy="47" r="4" className="sa-mini-node" />
-        ircle cx="77" cy="47" r="4" className="sa-mini-node" />
-        ircle cx="60" cy="77" r="4" className="sa-mini-node" />
+        <circle cx="60" cy="58" r="7" className="sa-core-node" />
+        <circle cx="43" cy="47" r="4" className="sa-mini-node" />
+        <circle cx="77" cy="47" r="4" className="sa-mini-node" />
+        <circle cx="60" cy="77" r="4" className="sa-mini-node" />
       </svg>
     ),
   },
@@ -71,7 +71,10 @@ const MOBILE_DIAGRAMS = [
     icon: (
       <svg viewBox="0 0 120 120" aria-hidden="true">
         <ellipse cx="60" cy="36" rx="24" ry="10" className="sa-coin-top" />
-        <path d="M36 36 V58 C36 64 47 69 60 69 C73 69 84 64 84 58 V36" className="sa-coin-body" />
+        <path
+          d="M36 36 V58 C36 64 47 69 60 69 C73 69 84 64 84 58 V36"
+          className="sa-coin-body"
+        />
         <ellipse cx="60" cy="58" rx="24" ry="10" className="sa-coin-mid" />
         <path d="M42 74 C52 64 68 64 78 74" className="sa-flow-arc" />
         <path d="M48 84 C57 77 63 77 72 84" className="sa-flow-arc sa-flow-arc--small" />
@@ -87,9 +90,15 @@ const MOBILE_DIAGRAMS = [
     accent: "magenta",
     icon: (
       <svg viewBox="0 0 120 120" aria-hidden="true">
-        <path d="M60 18 L90 30 V54 C90 74 76 90 60 100 C44 90 30 74 30 54 V30 Z" className="sa-shield-core" />
-        <path d="M60 34 L76 40 V54 C76 66 68 76 60 82 C52 76 44 66 44 54 V40 Z" className="sa-shield-inner" />
-        ircle cx="60" cy="56" r="26" className="sa-orbit-line sa-orbit-line--faint" />
+        <path
+          d="M60 18 L90 30 V54 C90 74 76 90 60 100 C44 90 30 74 30 54 V30 Z"
+          className="sa-shield-core"
+        />
+        <path
+          d="M60 34 L76 40 V54 C76 66 68 76 60 82 C52 76 44 66 44 54 V40 Z"
+          className="sa-shield-inner"
+        />
+        <circle cx="60" cy="56" r="26" className="sa-orbit-line sa-orbit-line--faint" />
       </svg>
     ),
   },
@@ -103,9 +112,9 @@ const MOBILE_DIAGRAMS = [
     icon: (
       <svg viewBox="0 0 120 120" aria-hidden="true">
         <path d="M20 86 C30 68 42 68 52 54 C62 40 74 40 86 22" className="sa-route-line" />
-        ircle cx="20" cy="86" r="6" className="sa-route-node" />
-        ircle cx="52" cy="54" r="6" className="sa-route-node" />
-        ircle cx="86" cy="22" r="6" className="sa-route-node" />
+        <circle cx="20" cy="86" r="6" className="sa-route-node" />
+        <circle cx="52" cy="54" r="6" className="sa-route-node" />
+        <circle cx="86" cy="22" r="6" className="sa-route-node" />
         <path d="M78 18 L94 18 L94 34" className="sa-arrow-tip" />
       </svg>
     ),
@@ -164,8 +173,8 @@ function clampValue(value) {
 function InsightList({ items }) {
   return (
     <ul className="cyber-list">
-      {items.map((item, index) =>=> (
-        >
+      {items.map((item, index) => (
+        <li key={index}>
           <span className="cyber-dot" />
           <span>{item}</span>
         </li>
@@ -195,7 +204,12 @@ function MobileDiagramModal({ item, onClose }) {
   return (
     <div className="sa-modal-backdrop" role="dialog" aria-modal="true" aria-label={item.title}>
       <div className="sa-modal-card cyber-corner-cut">
-        <button type="button" className="sa-modal-close" aria-label="Close popup" onClick={onClose}>
+        <button
+          type="button"
+          className="sa-modal-close"
+          aria-label="Close popup"
+          onClick={onClose}
+        >
           ×
         </button>
         <div className={`sa-modal-icon is-${item.accent}`}>{item.icon}</div>
