@@ -1,1 +1,169 @@
+.cyber-app-frame {
+  position: relative;
+  min-height: 100dvh;
+  isolation: isolate;
+}
+
+.cyber-app-frame::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(85, 246, 255, 0.08), transparent 18%),
+    radial-gradient(circle at 85% 12%, rgba(255, 79, 216, 0.08), transparent 16%),
+    radial-gradient(circle at 50% 85%, rgba(123, 97, 255, 0.1), transparent 22%);
+  z-index: -2;
+}
+
+.cyber-app-frame::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0) 0px,
+      rgba(255, 255, 255, 0) 2px,
+      rgba(85, 246, 255, 0.035) 3px,
+      rgba(85, 246, 255, 0.015) 4px
+    );
+  opacity: 0.45;
+  mix-blend-mode: screen;
+  z-index: -1;
+}
+
+.cyber-skip-link {
+  position: absolute;
+  left: 12px;
+  top: -60px;
+  z-index: 999;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #0b1020;
+  color: white;
+  border: 1px solid rgba(85, 246, 255, 0.28);
+}
+
+.cyber-skip-link:focus {
+  top: 12px;
+}
+
+.cyber-tilt {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.cyber-tilt-layer {
+  transform: translateZ(26px);
+}
+
+.cyber-holo-line {
+  position: absolute;
+  inset: auto 0 14px 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(85, 246, 255, 0.8), transparent);
+  box-shadow: 0 0 18px rgba(85, 246, 255, 0.35);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.cyber-corner-cut::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, transparent 48%, rgba(85, 246, 255, 0.16) 49%, rgba(85, 246, 255, 0.06) 100%);
+  clip-path: polygon(100% 0, 0 0, 100% 100%);
+  pointer-events: none;
+}
+
+.cyber-grid-lines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(94, 168, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(94, 168, 255, 0.08) 1px, transparent 1px);
+  background-size: 26px 26px;
+  mask-image: radial-gradient(circle at center, black 34%, transparent 90%);
+  opacity: 0.25;
+  z-index: 0;
+}
+
+.cyber-noise {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image:
+    radial-gradient(rgba(255,255,255,0.5) 0.6px, transparent 0.8px);
+  background-size: 8px 8px;
+  mix-blend-mode: soft-light;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cyber-app-frame::after {
+    opacity: 0.18;
+  }
+
+  .cyber-tilt {
+    transform: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cyber-panel,
+  .cyber-card,
+  .cyber-stat,
+  .cyber-chart,
+  .cyber-hero-card,
+  .cyber-button,
+  .cyber-button-secondary {
+    transition:
+      transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 220ms cubic-bezier(0.16, 1, 0.3, 1),
+      filter 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .cyber-panel:hover,
+  .cyber-card:hover,
+  .cyber-stat:hover,
+  .cyber-chart:hover,
+  .cyber-hero-card:hover {
+    border-color: rgba(85, 246, 255, 0.35);
+    filter: saturate(1.08);
+  }
+
+  .cyber-app-frame::after {
+    animation: scan-drift 10s linear infinite;
+  }
+
+  .cyber-hero-title {
+    animation: neon-breathe 4.5s ease-in-out infinite;
+  }
+}
+
+@keyframes scan-drift {
+  from { transform: translateY(0); }
+  to { transform: translateY(6px); }
+}
+
+@keyframes neon-breathe {
+  0%, 100% {
+    text-shadow:
+      0 0 12px rgba(85, 246, 255, 0.16),
+      0 0 28px rgba(123, 97, 255, 0.12);
+  }
+  50% {
+    text-shadow:
+      0 0 18px rgba(85, 246, 255, 0.28),
+      0 0 36px rgba(255, 79, 216, 0.18);
+  }
+}
 
