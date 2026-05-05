@@ -1,3 +1,5 @@
+import "./globals.css";
+
 export const metadata = {
   title: "SaaS Idea Validator",
   description: "Validate SaaS ideas with scoring, market signals, risk analysis, and optional premium AI insight.",
