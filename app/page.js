@@ -64,7 +64,8 @@ const PRICING_TIERS = [
     price: "€99",
     period: "/month",
     badge: "For teams",
-    tagline: "Run collaborative validation workflows across several ideas and stakeholders.",
+    tagline:
+      "Run collaborative validation workflows across several ideas and stakeholders.",
     features: [
       "Unlimited workspaces",
       "Shared review logic",
@@ -120,7 +121,10 @@ const EVIDENCE_SCHEMA = {
   authors_or_institution: ["string"],
   publication_date: "ISO_8601_string",
   methodology: "string",
-  sample_size: { value: 0, unit: "participants | companies | documents | null" },
+  sample_size: {
+    value: 0,
+    unit: "participants | companies | documents | null",
+  },
   funding_or_conflicts: "string | null",
   geographic_relevance: "string",
   quality_checklist: {
@@ -332,7 +336,10 @@ function buildResearchModelPreview(idea, uploadedName) {
     },
   ].map(scoreEvidenceSource);
 
-  const accepted = sources.filter((source) => source.quality_level !== "REJECTED");
+  const accepted = sources.filter(
+    (source) => source.quality_level !== "REJECTED"
+  );
+
   const averageQuality = accepted.length
     ? Math.round(
         accepted.reduce((sum, source) => sum + source.quality_score, 0) /
@@ -365,6 +372,7 @@ function buildResearchModelPreview(idea, uploadedName) {
 
 function MetricBar({ label, value }) {
   const safe = clampValue(value);
+
   return (
     <div className="cyber-bar-row">
       <div className="cyber-bar-top">
@@ -528,11 +536,21 @@ export default function HomePage() {
           className={`siv-drawer ${menuOpen ? "is-open" : ""}`}
           aria-hidden={!menuOpen}
         >
-          <button type="button" className="siv-drawer-link">Login</button>
-          <button type="button" className="siv-drawer-link">Logout</button>
-          <button type="button" className="siv-drawer-link">Toggle My Projects</button>
-          <button type="button" className="siv-drawer-link">Account</button>
-          <button type="button" className="siv-drawer-link">Settings</button>
+          <button type="button" className="siv-drawer-link">
+            Login
+          </button>
+          <button type="button" className="siv-drawer-link">
+            Logout
+          </button>
+          <button type="button" className="siv-drawer-link">
+            Toggle My Projects
+          </button>
+          <button type="button" className="siv-drawer-link">
+            Account
+          </button>
+          <button type="button" className="siv-drawer-link">
+            Settings
+          </button>
         </aside>
       </header>
 
@@ -585,8 +603,9 @@ export default function HomePage() {
             Validate SaaS ideas with a neon-fast decision workflow.
           </h1>
           <p className="cyber-subtitle">
-            SIV helps founders understand whether an idea deserves refinement, testing,
-            or execution by turning rough inputs into clear visual reasoning.
+            SIV helps founders understand whether an idea deserves refinement,
+            testing, or execution by turning rough inputs into clear visual
+            reasoning.
           </p>
         </div>
 
@@ -619,7 +638,8 @@ export default function HomePage() {
             <div className="cyber-panel-inner">
               <div className="cyber-section-title">Input Console</div>
               <p className="cyber-muted">
-                Paste your SaaS idea below or upload a file for stronger validation context.
+                Paste your SaaS idea below or upload a file for stronger
+                validation context.
               </p>
 
               <div className="cyber-divider" />
@@ -652,7 +672,9 @@ export default function HomePage() {
                     or tap to upload notes, screenshots, PDFs, or research
                   </span>
                   {uploadedName ? (
-                    <span className="siv-uploaded-name">Uploaded: {uploadedName}</span>
+                    <span className="siv-uploaded-name">
+                      Uploaded: {uploadedName}
+                    </span>
                   ) : null}
                 </label>
               </div>
@@ -678,7 +700,8 @@ export default function HomePage() {
                 <div className="cyber-chart-inner">
                   <div className="cyber-section-title">Validation Response</div>
                   <p className="cyber-muted">
-                    Your result appears directly underneath the input area to keep the workflow focused and easy to follow.
+                    Your result appears directly underneath the input area to keep
+                    the workflow focused and easy to follow.
                   </p>
 
                   <div className="cyber-divider" />
@@ -699,8 +722,14 @@ export default function HomePage() {
 
                   <div className="cyber-chart-bars">
                     <MetricBar label="Demand" value={analysis.demand} />
-                    <MetricBar label="Feasibility" value={analysis.feasibility} />
-                    <MetricBar label="Monetization" value={analysis.monetization} />
+                    <MetricBar
+                      label="Feasibility"
+                      value={analysis.feasibility}
+                    />
+                    <MetricBar
+                      label="Monetization"
+                      value={analysis.monetization}
+                    />
                     <MetricBar label="Defensibility" value={analysis.moat} />
                   </div>
 
@@ -714,9 +743,13 @@ export default function HomePage() {
                 <div className="cyber-grid-lines" />
                 <div className="cyber-noise" />
                 <div className="cyber-card-inner">
-                  <div className="cyber-section-title">Scientific Scraping Model</div>
+                  <div className="cyber-section-title">
+                    Scientific Scraping Model
+                  </div>
                   <p className="cyber-muted">
-                    A JavaScript evidence-governance layer scores source quality, weights accepted evidence, and lowers confidence when the evidence is weak.
+                    A JavaScript evidence-governance layer scores source quality,
+                    weights accepted evidence, and lowers confidence when the
+                    evidence is weak.
                   </p>
 
                   <div className="cyber-divider" />
@@ -743,18 +776,24 @@ export default function HomePage() {
                   <div className="cyber-divider" />
 
                   <div className="siv-source-grid">
-                    {researchModel.accepted.concat(researchModel.rejected).map((source) => (
-                      <div key={source.source_id} className="siv-source-item">
-                        <div className="siv-source-top">
-                          <span className={`siv-source-badge ${source.quality_level.toLowerCase()}`}>
-                            {source.quality_level.replace("_", " ")}
-                          </span>
-                          <span className="siv-source-score">{source.quality_score}/100</span>
+                    {researchModel.accepted
+                      .concat(researchModel.rejected)
+                      .map((source) => (
+                        <div key={source.source_id} className="siv-source-item">
+                          <div className="siv-source-top">
+                            <span
+                              className={`siv-source-badge ${source.quality_level.toLowerCase()}`}
+                            >
+                              {source.quality_level.replace("_", " ")}
+                            </span>
+                            <span className="siv-source-score">
+                              {source.quality_score}/100
+                            </span>
+                          </div>
+                          <div className="siv-source-title">{source.title}</div>
+                          <p className="cyber-muted">{source.reasoning}</p>
                         </div>
-                        <div className="siv-source-title">{source.title}</div>
-                        <p className="cyber-muted">{source.reasoning}</p>
-                      </div>
-                    ))}
+                      ))}
                   </div>
 
                   <div className="cyber-divider" />
@@ -801,7 +840,8 @@ export default function HomePage() {
             Choose the tier that matches your validation speed.
           </h2>
           <p className="cyber-subtitle">
-            Start simple, go deeper when you need stronger comparisons, and scale up when several people need one evidence standard.
+            Start simple, go deeper when you need stronger comparisons, and scale
+            up when several people need one evidence standard.
           </p>
         </div>
 
@@ -842,7 +882,10 @@ export default function HomePage() {
       </section>
 
       {activeTier ? (
-        <div className="siv-modal-backdrop" onClick={() => setSelectedTier(null)}>
+        <div
+          className="siv-modal-backdrop"
+          onClick={() => setSelectedTier(null)}
+        >
           <div
             className="siv-modal cyber-corner-cut"
             role="dialog"
