@@ -257,7 +257,7 @@ function buildResearchModelPreview(idea, uploadedName) {
           peer_reviewed_or_audited: false,
           methodology_transparent: true,
           sample_size_meaningful: true,
-          conclusions_supported_by_ true,
+          conclusions_supported_by_: true,
           confidence_intervals_or_significance: false,
           causal_claims_justified: false,
           reproducible: false,
