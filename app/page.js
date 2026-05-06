@@ -1,186 +1,366 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const HERO_SLIDES = [
   {
     id: 1,
     image:
       "https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/123bd5a0-9d16-4c28-9aff-2d705d6e5a2d.png",
-    alt: "SaaEvol futuristic banner showing SaaS idea evaluation workflow and visual product intelligence",
+    alt: "SIV futuristic workflow banner showing idea input, AI analysis, and action outputs",
   },
   {
     id: 2,
     image:
       "https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/494d2541-9c72-42c4-be59-8da7d92444ab.png",
-    alt: "SaaEvol premium SaaS evaluation dashboard showing scoring, decision flows, and analytics panels",
+    alt: "SIV upload and dashboard banner showing drag and drop, AI validation, score dashboard, and decision workflow",
   },
 ];
 
-const MOBILE_DIAGRAMS = [
+const PRICING_TIERS = [
   {
-    id: "signal-scan",
-    title: "Signal Scan",
-    short: "Pulse scan",
-    description:
-      "A neon radar orb that represents scanning a SaaS idea for market demand, urgency, and signal strength before you build.",
-    accent: "cyan",
-    icon: (
-      <svg viewBox="0 0 120 120" aria-hidden="true">
-        <defs>
-          <radialGradient id="scanCore" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#b6fff8" />
-            <stop offset="40%" stopColor="#39f3ff" />
-            <stop offset="100%" stopColor="#10263f" />
-          </radialGradient>
-        </defs>
-        <circle cx="60" cy="60" r="22" fill="url(#scanCore)" />
-        <circle cx="60" cy="60" r="34" className="sa-orbit-line" />
-        <circle cx="60" cy="60" r="48" className="sa-orbit-line sa-orbit-line--faint" />
-        <path d="M60 12 A48 48 0 0 1 108 60" className="sa-scan-sweep" />
-        <circle cx="92" cy="34" r="4" className="sa-scan-dot" />
-      </svg>
-    ),
-  },
-  {
-    id: "fit-map",
-    title: "Fit Map",
-    short: "Fit map",
-    description:
-      "A glowing 3D matrix showing how problem pain, audience fit, and timing overlap to reveal product-market fit potential.",
-    accent: "violet",
-    icon: (
-      <svg viewBox="0 0 120 120" aria-hidden="true">
-        <path d="M24 38 L60 18 L96 38 L60 58 Z" className="sa-iso-top" />
-        <path d="M24 38 L24 78 L60 98 L60 58 Z" className="sa-iso-left" />
-        <path d="M96 38 L96 78 L60 98 L60 58 Z" className="sa-iso-right" />
-        <circle cx="60" cy="58" r="7" className="sa-core-node" />
-        <circle cx="43" cy="47" r="4" className="sa-mini-node" />
-        <circle cx="77" cy="47" r="4" className="sa-mini-node" />
-        <circle cx="60" cy="77" r="4" className="sa-mini-node" />
-      </svg>
-    ),
-  },
-  {
-    id: "revenue-engine",
-    title: "Revenue Engine",
-    short: "Revenue",
-    description:
-      "A luminous stack of coins and flow lines that explains monetization strength, price logic, and subscription viability.",
-    accent: "gold",
-    icon: (
-      <svg viewBox="0 0 120 120" aria-hidden="true">
-        <ellipse cx="60" cy="36" rx="24" ry="10" className="sa-coin-top" />
-        <path
-          d="M36 36 V58 C36 64 47 69 60 69 C73 69 84 64 84 58 V36"
-          className="sa-coin-body"
-        />
-        <ellipse cx="60" cy="58" rx="24" ry="10" className="sa-coin-mid" />
-        <path d="M42 74 C52 64 68 64 78 74" className="sa-flow-arc" />
-        <path d="M48 84 C57 77 63 77 72 84" className="sa-flow-arc sa-flow-arc--small" />
-      </svg>
-    ),
-  },
-  {
-    id: "moat-shield",
-    title: "Moat Shield",
-    short: "Moat",
-    description:
-      "A faceted shield with orbit rings that stands for defensibility, differentiation, and resistance to copycat competitors.",
-    accent: "magenta",
-    icon: (
-      <svg viewBox="0 0 120 120" aria-hidden="true">
-        <path
-          d="M60 18 L90 30 V54 C90 74 76 90 60 100 C44 90 30 74 30 54 V30 Z"
-          className="sa-shield-core"
-        />
-        <path
-          d="M60 34 L76 40 V54 C76 66 68 76 60 82 C52 76 44 66 44 54 V40 Z"
-          className="sa-shield-inner"
-        />
-        <circle cx="60" cy="56" r="26" className="sa-orbit-line sa-orbit-line--faint" />
-      </svg>
-    ),
-  },
-  {
-    id: "launch-path",
-    title: "Launch Path",
-    short: "Launch",
-    description:
-      "A neon route system with connected milestones that shows execution sequence, onboarding flow, and go-to-market readiness.",
-    accent: "lime",
-    icon: (
-      <svg viewBox="0 0 120 120" aria-hidden="true">
-        <path d="M20 86 C30 68 42 68 52 54 C62 40 74 40 86 22" className="sa-route-line" />
-        <circle cx="20" cy="86" r="6" className="sa-route-node" />
-        <circle cx="52" cy="54" r="6" className="sa-route-node" />
-        <circle cx="86" cy="22" r="6" className="sa-route-node" />
-        <path d="M78 18 L94 18 L94 34" className="sa-arrow-tip" />
-      </svg>
-    ),
-  },
-];
-
-const PRICING_PLANS = [
-  {
+    id: "starter",
     name: "Starter",
-    price: "$0",
-    subtext: "For early concept checks",
-    badge: "Explore",
+    price: "€19",
+    period: "/month",
+    badge: "For solo founders",
+    tagline: "Validate one idea with strong structure and clear next steps.",
     features: [
-      "Basic SaaS idea score",
-      "Market-need risk snapshot",
-      "Problem clarity guidance",
-      "One-project workspace",
+      "1 active validation workspace",
+      "Core scoring model",
+      "Source quality checklist",
+      "Action-oriented idea guidance",
     ],
-    metric: "Best for early filtering",
-    stat: "Built for the 42% market-need failure risk founders want to avoid first",
+    details: [
+      "Designed for solo founders testing one promising concept at a time.",
+      "Good fit when you need a structured signal before spending weeks building.",
+      "Includes the quality-control model so evidence is weighted, not guessed.",
+    ],
+    cta: "Start Starter",
   },
   {
+    id: "pro",
     name: "Pro",
-    price: "$29",
-    subtext: "per month",
-    badge: "Most Popular",
+    price: "€49",
+    period: "/month",
+    badge: "Most popular",
+    tagline: "Compare ideas, score evidence, and move from signal to decision faster.",
     features: [
-      "Advanced evaluation model",
-      "ICP and monetization guidance",
-      "Competitor and positioning signals",
-      "Priority scoring views and export-ready outputs",
+      "10 active validation workspaces",
+      "Evidence weighting engine",
+      "Decision matrix and confidence scoring",
+      "Pricing and positioning comparison support",
     ],
-    metric: "Typical SaaS trial-to-paid benchmark",
-    stat: "Good SaaS trial conversion often lands around 15–25% when value is clear",
+    details: [
+      "Built for active founders refining multiple SaaS opportunities.",
+      "Useful when monetization, feasibility, and defensibility need deeper review.",
+      "Best plan for going from rough concepts to a more investment-worthy thesis.",
+    ],
+    cta: "Choose Pro",
   },
   {
-    name: "Scale",
-    price: "$149",
-    subtext: "per month",
-    badge: "Teams",
+    id: "team",
+    name: "Team",
+    price: "€99",
+    period: "/month",
+    badge: "For teams",
+    tagline: "Run collaborative validation workflows across several ideas and stakeholders.",
     features: [
-      "Unlimited projects",
-      "Portfolio and workspace workflows",
-      "Team collaboration and approval layers",
-      "Decision dashboards for repeatable SaaS evaluation",
+      "Unlimited workspaces",
+      "Shared review logic",
+      "Priority support",
+      "Team-ready evidence audit trails",
     ],
-    metric: "Enterprise decision clarity",
-    stat: "Teams with stronger activation and onboarding clarity materially improve adoption and retention",
+    details: [
+      "Made for cofounders, studios, and small product teams evaluating several bets.",
+      "Helps keep research quality consistent across team members.",
+      "Adds process discipline when decisions need to be defensible later.",
+    ],
+    cta: "Talk to sales",
   },
 ];
+
+const RESEARCH_PROMPT = `You are operating as a Scientific Research, Verification, and Decision Intelligence System.
+
+Your primary objective is not speed.
+Your primary objective is to gather the most reliable, evidence-based, scientifically valid, and decision-relevant information possible.
+
+Prioritize:
+- Accuracy
+- Reliability
+- Scientific rigor
+- Verifiable evidence
+- Transparency
+- Data quality
+- Trustworthiness
+- Reproducibility
+
+Source priority hierarchy:
+Tier 1: peer-reviewed journals, meta-analyses, systematic reviews, government datasets, scientific institutions.
+Tier 2: established industry reports, public company filings, large-scale surveys, research organizations.
+Tier 3: major news organizations, expert interviews, verified case studies, reputable blogs with citations.
+Tier 4: anecdotal reports, opinion pieces, social media claims, marketing material.
+
+For every source, evaluate scientific validity, source reliability, data quality, and decision relevance. Score each true criterion with +1 and compute:
+Quality Score = (True Answers / Total Questions) * 100.
+
+Thresholds:
+90-100 = HIGH TRUST
+75-89 = MODERATE TRUST
+60-74 = LOW TRUST
+Below 60 = REJECTED
+
+If evidence is weak, disclose limitations clearly and reduce confidence accordingly.`;
+
+const EVIDENCE_SCHEMA = {
+  source_id: "string",
+  source_type:
+    "peer_reviewed_journal | meta_analysis | systematic_review | government_data | company_filing | industry_report | news | blog | social_media | other",
+  title: "string",
+  authors_or_institution: ["string"],
+  publication_date: "ISO_8601_string",
+  methodology: "string",
+  sample_size: { value: 0, unit: "participants | companies | documents | null" },
+  funding_or_conflicts: "string | null",
+  geographic_relevance: "string",
+  quality_checklist: {
+    scientific_validity: {
+      peer_reviewed_or_audited: false,
+      methodology_transparent: false,
+      sample_size_meaningful: false,
+      conclusions_supported_by_ false,
+      confidence_intervals_or_significance: false,
+      causal_claims_justified: false,
+      reproducible: false,
+      limitations_acknowledged: false,
+    },
+    source_reliability: {
+      institution_reputable: false,
+      authors_qualified: false,
+      bias_or_conflict_indicated: false,
+      independently_corroborated: false,
+      widely_cited_or_referenced: false,
+      recent_enough: false,
+    },
+    data_quality: {
+      statistics_consistent: false,
+      calculations_valid: false,
+      datasets_complete: false,
+      assumptions_stated: false,
+      uncertainty_quantified: false,
+    },
+    decision_relevance: {
+      directly_relevant: false,
+      improves_decision_quality: false,
+      actionable_insight: false,
+      improves_confidence: false,
+    },
+  },
+  total_true_answers: 0,
+  quality_score: 0,
+  quality_level: "REJECTED",
+  reasoning: "string",
+};
 
 function clampValue(value) {
   return Math.max(0, Math.min(100, value));
 }
 
-function InsightList({ items }) {
-  return (
-    <ul className="cyber-list">
-      {items.map((item, index) => (
-        <li key={index}>
-          <span className="cyber-dot" />
-          <span>{item}</span>
-        </li>
-      ))}
-    </ul>
+function scoreEvidenceSource(source) {
+  const sections = Object.values(source.quality_checklist || {});
+  const values = sections.flatMap((section) => Object.values(section));
+  const trueAnswers = values.filter(Boolean).length;
+  const totalQuestions = values.length || 1;
+  const qualityScore = Math.round((trueAnswers / totalQuestions) * 100);
+
+  let qualityLevel = "REJECTED";
+  if (qualityScore >= 90) qualityLevel = "HIGH_TRUST";
+  else if (qualityScore >= 75) qualityLevel = "MODERATE_TRUST";
+  else if (qualityScore >= 60) qualityLevel = "LOW_TRUST";
+
+  return {
+    ...source,
+    total_true_answers: trueAnswers,
+    quality_score: qualityScore,
+    quality_level: qualityLevel,
+  };
+}
+
+function buildResearchModelPreview(idea, uploadedName) {
+  const normalized = idea.trim().toLowerCase();
+  const hasText = normalized.length > 20;
+  const hasFile = Boolean(uploadedName);
+
+  const sources = [
+    {
+      source_id: "demo-systematic-review",
+      source_type: "systematic_review",
+      title: "Comparable domain review",
+      authors_or_institution: ["Independent research group"],
+      publication_date: "2025-02-01",
+      methodology: "systematic review",
+      sample_size: { value: 42, unit: "documents" },
+      funding_or_conflicts: "None disclosed",
+      geographic_relevance: "global",
+      quality_checklist: {
+        scientific_validity: {
+          peer_reviewed_or_audited: true,
+          methodology_transparent: true,
+          sample_size_meaningful: true,
+          conclusions_supported_by_ true,
+          confidence_intervals_or_significance: true,
+          causal_claims_justified: false,
+          reproducible: true,
+          limitations_acknowledged: true,
+        },
+        source_reliability: {
+          institution_reputable: true,
+          authors_qualified: true,
+          bias_or_conflict_indicated: true,
+          independently_corroborated: true,
+          widely_cited_or_referenced: true,
+          recent_enough: true,
+        },
+        data_quality: {
+          statistics_consistent: true,
+          calculations_valid: true,
+          datasets_complete: true,
+          assumptions_stated: true,
+          uncertainty_quantified: true,
+        },
+        decision_relevance: {
+          directly_relevant: hasText,
+          improves_decision_quality: true,
+          actionable_insight: true,
+          improves_confidence: true,
+        },
+      },
+      reasoning:
+        "High-quality evidence with transparent methods and clear decision relevance.",
+    },
+    {
+      source_id: "demo-industry-report",
+      source_type: "industry_report",
+      title: "Market report with pricing and category benchmarks",
+      authors_or_institution: ["Established research publisher"],
+      publication_date: "2025-09-10",
+      methodology: "industry survey",
+      sample_size: { value: 1200, unit: "companies" },
+      funding_or_conflicts: "Commercial publisher",
+      geographic_relevance: "EU/US",
+      quality_checklist: {
+        scientific_validity: {
+          peer_reviewed_or_audited: false,
+          methodology_transparent: true,
+          sample_size_meaningful: true,
+          conclusions_supported_by_ true,
+          confidence_intervals_or_significance: false,
+          causal_claims_justified: false,
+          reproducible: false,
+          limitations_acknowledged: true,
+        },
+        source_reliability: {
+          institution_reputable: true,
+          authors_qualified: true,
+          bias_or_conflict_indicated: true,
+          independently_corroborated: hasFile,
+          widely_cited_or_referenced: true,
+          recent_enough: true,
+        },
+        data_quality: {
+          statistics_consistent: true,
+          calculations_valid: true,
+          datasets_complete: true,
+          assumptions_stated: true,
+          uncertainty_quantified: false,
+        },
+        decision_relevance: {
+          directly_relevant: true,
+          improves_decision_quality: true,
+          actionable_insight: true,
+          improves_confidence: true,
+        },
+      },
+      reasoning:
+        "Useful decision support evidence, but with weaker reproducibility than academic research.",
+    },
+    {
+      source_id: "demo-blog-post",
+      source_type: "blog",
+      title: "Founder commentary and anecdotal market observations",
+      authors_or_institution: ["Independent operator"],
+      publication_date: "2026-01-12",
+      methodology: "anecdotal post",
+      sample_size: { value: null, unit: null },
+      funding_or_conflicts: "Unknown",
+      geographic_relevance: "unknown",
+      quality_checklist: {
+        scientific_validity: {
+          peer_reviewed_or_audited: false,
+          methodology_transparent: false,
+          sample_size_meaningful: false,
+          conclusions_supported_by_ false,
+          confidence_intervals_or_significance: false,
+          causal_claims_justified: false,
+          reproducible: false,
+          limitations_acknowledged: false,
+        },
+        source_reliability: {
+          institution_reputable: false,
+          authors_qualified: false,
+          bias_or_conflict_indicated: false,
+          independently_corroborated: false,
+          widely_cited_or_referenced: false,
+          recent_enough: true,
+        },
+        data_quality: {
+          statistics_consistent: false,
+          calculations_valid: false,
+          datasets_complete: false,
+          assumptions_stated: false,
+          uncertainty_quantified: false,
+        },
+        decision_relevance: {
+          directly_relevant: normalized.includes("founder"),
+          improves_decision_quality: false,
+          actionable_insight: normalized.length > 80,
+          improves_confidence: false,
+        },
+      },
+      reasoning:
+        "Low-rigor directional context only; should not drive the main recommendation.",
+    },
+  ].map(scoreEvidenceSource);
+
+  const accepted = sources.filter((source) => source.quality_level !== "REJECTED");
+  const averageQuality = accepted.length
+    ? Math.round(
+        accepted.reduce((sum, source) => sum + source.quality_score, 0) /
+          accepted.length
+      )
+    : 0;
+
+  const confidence = clampValue(
+    Math.round(
+      averageQuality * 0.7 +
+        (hasText ? 12 : 0) +
+        (hasFile ? 10 : 0) +
+        Math.min(normalized.length / 10, 8)
+    )
   );
+
+  return {
+    accepted,
+    rejected: sources.filter((source) => source.quality_level === "REJECTED"),
+    averageQuality,
+    confidence,
+    recommendation:
+      confidence >= 80
+        ? "High-confidence direction: continue validating demand and test pricing with real users."
+        : confidence >= 60
+          ? "Moderate-confidence direction: strengthen primary evidence before committing to build."
+          : "Low-confidence direction: collect stronger Tier 1 and Tier 2 evidence before deciding.",
+  };
 }
 
 function MetricBar({ label, value }) {
@@ -198,63 +378,29 @@ function MetricBar({ label, value }) {
   );
 }
 
-function MobileDiagramModal({ item, onClose }) {
-  if (!item) return null;
-
+function InsightList({ items }) {
   return (
-    <div className="sa-modal-backdrop" role="dialog" aria-modal="true" aria-label={item.title}>
-      <div className="sa-modal-card cyber-corner-cut">
-        <button
-          type="button"
-          className="sa-modal-close"
-          aria-label="Close popup"
-          onClick={onClose}
-        >
-          ×
-        </button>
-        <div className={`sa-modal-icon is-${item.accent}`}>{item.icon}</div>
-        <h3 className="sa-modal-title">{item.title}</h3>
-        <p className="sa-modal-copy">{item.description}</p>
-      </div>
-    </div>
-  );
-}
-
-function MobileHeroDiagrams({ onSelect }) {
-  return (
-    <section className="sa-mobile-hero" aria-label="Mobile SaaS explanation diagrams">
-      <div className="sa-mobile-hero-head">
-        <div className="cyber-kicker">Tap a signal</div>
-        <h2 className="sa-mobile-hero-title">Interactive evaluation system</h2>
-      </div>
-
-      <div className="sa-mobile-diagram-grid">
-        {MOBILE_DIAGRAMS.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className={`sa-mobile-diagram-card is-${item.accent}`}
-            aria-label={item.title}
-            onClick={() => onSelect(item)}
-          >
-            <div className="sa-mobile-diagram-glow" />
-            <div className="sa-mobile-diagram-icon">{item.icon}</div>
-            <div className="sa-mobile-diagram-caption">{item.short}</div>
-          </button>
-        ))}
-      </div>
-    </section>
+    <ul className="cyber-list">
+      {items.map((item, index) => (
+        <li key={index} className="cyber-list-item">
+          <span className="cyber-dot" />
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
   );
 }
 
 export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const [idea, setIdea] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const [uploadedName, setUploadedName] = useState("");
   const [autoplayPaused, setAutoplayPaused] = useState(false);
-  const [activeDiagram, setActiveDiagram] = useState(null);
+  const [selectedTier, setSelectedTier] = useState(null);
+  const modalCloseRef = useRef(null);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -268,17 +414,25 @@ export default function HomePage() {
   }, [autoplayPaused]);
 
   useEffect(() => {
-    if (!activeDiagram) return;
+    if (!selectedTier) return undefined;
 
-    const onKeyDown = (event) => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    modalCloseRef.current?.focus();
+
+    function handleKeyDown(event) {
       if (event.key === "Escape") {
-        setActiveDiagram(null);
+        setSelectedTier(null);
       }
-    };
+    }
 
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [activeDiagram]);
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectedTier]);
 
   const analysis = useMemo(() => {
     const text = idea.trim().toLowerCase();
@@ -287,10 +441,11 @@ export default function HomePage() {
       (text.includes("ai") ? 8 : 0) +
       (text.includes("saas") ? 10 : 0) +
       (text.includes("subscription") ? 8 : 0) +
-      (text.includes("marketplace") ? 6 : 0) +
-      (text.includes("automation") ? 7 : 0);
+      (text.includes("mobile") ? 7 : 0) +
+      (text.includes("marketplace") ? 6 : 0);
 
-    const base = 42 + lengthBoost + keywordBoost;
+    const fileBoost = uploadedName ? 8 : 0;
+    const base = 42 + lengthBoost + keywordBoost + fileBoost;
 
     const demand = clampValue(Math.round(base + 4));
     const moat = clampValue(Math.round(base - 8));
@@ -304,216 +459,249 @@ export default function HomePage() {
       moat,
       feasibility,
       monetization,
-      workflow: [
-        "Input the SaaS concept.",
-        "Map risk, demand, monetization, and execution signals.",
-        "Review the score and act with conviction.",
-      ],
       insights: [
-        "42% of startup failure analysis is tied to no market need, so early evaluation is one of the highest-leverage founder actions.",
-        "Freemium products often convert only 2–5%, which means the product story and activation path must be sharp early.",
-        "Strong onboarding and activation design directly improve evaluation usefulness and conversion potential.",
+        "SIV turns raw founder thinking into a clearer product signal before time gets wasted on weak execution paths.",
+        "The app is useful because it compresses ideation, evaluation, and decision-making into one fast workflow.",
+        "Uploading supporting files gives the validator more context and makes the recommendations stronger.",
+      ],
+      workflow: [
+        "Enter a SaaS idea or drag in supporting material.",
+        "SIV evaluates opportunity, build fit, monetization, and defensibility.",
+        "You get a score, guidance, and a next-step decision path you can act on immediately.",
       ],
       actions: [
-        "Clarify who the buyer is and what painful problem gets solved.",
-        "Pressure-test willingness to pay before feature expansion.",
-        "Use the score to refine, validate, or drop the idea quickly.",
+        "Tighten the audience and pain point statement.",
+        "Test willingness to pay before feature expansion.",
+        "Use the score panel to decide whether to refine, pivot, or build.",
       ],
     };
-  }, [idea]);
+  }, [idea, uploadedName]);
+
+  const researchModel = useMemo(
+    () => buildResearchModelPreview(idea, uploadedName),
+    [idea, uploadedName]
+  );
 
   const currentSlide = HERO_SLIDES[activeSlide];
+  const activeTier = PRICING_TIERS.find((tier) => tier.id === selectedTier);
+
+  function handleFile(file) {
+    if (!file) return;
+    setUploadedName(file.name);
+  }
+
+  function onDrop(event) {
+    event.preventDefault();
+    setDragActive(false);
+    const file = event.dataTransfer.files?.[0];
+    handleFile(file);
+  }
 
   return (
-    <>
-      <main id="main-content" className="cyber-shell">
-        <header className="sa-navbar">
-          <div className="sa-navbar__inner">
-            <div className="sa-brand">
-              <div className="sa-logo" aria-hidden="true">
-                <span className="sa-logo-core">SE</span>
-              </div>
-              <div>
-                <div className="sa-brand-mark">SaaEvol</div>
-                <div className="sa-brand-name">Evolve ideas into investable SaaS decisions</div>
-              </div>
-            </div>
-
-            <div className="sa-nav-actions">
-              <button
-                type="button"
-                className={`sa-auth-toggle ${isLoggedIn ? "is-logged-in" : ""}`}
-                aria-pressed={isLoggedIn}
-                onClick={() => setIsLoggedIn((prev) => !prev)}
-              >
-                {isLoggedIn ? "Logout" : "Login"}
-              </button>
-
-              <div className="sa-menu-wrap">
-                <button
-                  type="button"
-                  className={`sa-menu-button ${menuOpen ? "is-open" : ""}`}
-                  aria-label="Toggle menu"
-                  aria-expanded={menuOpen}
-                  aria-controls="sa-drawer"
-                  onClick={() => setMenuOpen((prev) => !prev)}
-                >
-                  <span />
-                  <span />
-                  <span />
-                </button>
-
-                <aside
-                  id="sa-drawer"
-                  className={`sa-drawer ${menuOpen ? "is-open" : ""}`}
-                  aria-hidden={!menuOpen}
-                >
-                  <button type="button" className="sa-drawer-link">My Projects</button>
-                  <button type="button" className="sa-drawer-link">Account</button>
-                  <button type="button" className="sa-drawer-link">Settings</button>
-                </aside>
-              </div>
+    <main id="main-content" className="cyber-shell">
+      <header className="siv-navbar">
+        <div className="siv-navbar__inner">
+          <div className="siv-brand">
+            <div className="cyber-logo" aria-hidden="true" />
+            <div>
+              <div className="siv-brand-mark">SIV</div>
+              <div className="siv-brand-name">SaaS Idea Validator</div>
             </div>
           </div>
-        </header>
 
-        <section
-          className="sa-hero-carousel cyber-hero-card cyber-corner-cut"
-          aria-label="SaaEvol hero carousel"
-          aria-roledescription="carousel"
-          onMouseEnter={() => setAutoplayPaused(true)}
-          onMouseLeave={() => setAutoplayPaused(false)}
-        >
-          <div className="cyber-grid-lines" />
-          <div className="cyber-noise" />
-
-          <div className="sa-hero-media">
-            <img src={currentSlide.image} alt={currentSlide.alt} className="sa-hero-image" />
-          </div>
-
-          <div className="cyber-holo-line" />
-        </section>
-
-        <div className="sa-carousel-dots" role="tablist" aria-label="Hero slide navigation">
-          {HERO_SLIDES.map((slide, index) => (
-            <button
-              key={slide.id}
-              type="button"
-              role="tab"
-              aria-selected={activeSlide === index}
-              aria-label={`Show slide ${index + 1}`}
-              className={`sa-dot ${activeSlide === index ? "is-active" : ""}`}
-              onClick={() => {
-                setActiveSlide(index);
-                setAutoplayPaused(true);
-              }}
-            />
-          ))}
+          <button
+            type="button"
+            className={`siv-menu-button ${menuOpen ? "is-open" : ""}`}
+            aria-label="Toggle menu"
+            aria-expanded={menuOpen}
+            aria-controls="siv-drawer"
+            onClick={() => setMenuOpen((prev) => !prev)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
         </div>
 
-        <MobileHeroDiagrams onSelect={setActiveDiagram} />
+        <aside
+          id="siv-drawer"
+          className={`siv-drawer ${menuOpen ? "is-open" : ""}`}
+          aria-hidden={!menuOpen}
+        >
+          <button type="button" className="siv-drawer-link">Login</button>
+          <button type="button" className="siv-drawer-link">Logout</button>
+          <button type="button" className="siv-drawer-link">Toggle My Projects</button>
+          <button type="button" className="siv-drawer-link">Account</button>
+          <button type="button" className="siv-drawer-link">Settings</button>
+        </aside>
+      </header>
 
-        <section className="sa-explainer">
-          <div className="sa-explainer-copy">
-            <div className="cyber-kicker">SaaEvol // SaaS Evaluation Intelligence</div>
-            <h1 className="sa-section-display">
-              Evolve raw SaaS concepts into premium evaluation signals.
-            </h1>
-            <p className="cyber-subtitle">
-              SaaEvol helps founders and teams assess market need, monetization logic, execution difficulty,
-              and product defensibility before they commit serious build time.
-            </p>
+      <section
+        className="siv-hero-carousel cyber-hero-card cyber-corner-cut"
+        aria-label="SIV hero carousel"
+        aria-roledescription="carousel"
+        onMouseEnter={() => setAutoplayPaused(true)}
+        onMouseLeave={() => setAutoplayPaused(false)}
+      >
+        <div className="cyber-grid-lines" />
+        <div className="cyber-noise" />
+
+        <div className="siv-hero-media">
+          <img
+            src={currentSlide.image}
+            alt={currentSlide.alt}
+            className="siv-hero-image"
+          />
+        </div>
+
+        <div className="cyber-holo-line" />
+      </section>
+
+      <div
+        className="siv-carousel-dots"
+        role="tablist"
+        aria-label="Hero slide navigation"
+      >
+        {HERO_SLIDES.map((slide, index) => (
+          <button
+            key={slide.id}
+            type="button"
+            role="tab"
+            aria-selected={activeSlide === index}
+            aria-label={`Show slide ${index + 1}`}
+            className={`siv-dot ${activeSlide === index ? "is-active" : ""}`}
+            onClick={() => {
+              setActiveSlide(index);
+              setAutoplayPaused(true);
+            }}
+          />
+        ))}
+      </div>
+
+      <section className="siv-explainer">
+        <div className="siv-explainer-copy">
+          <div className="cyber-kicker">SIV // Founder Workflow Intelligence</div>
+          <h1 className="siv-section-display">
+            Validate SaaS ideas with a neon-fast decision workflow.
+          </h1>
+          <p className="cyber-subtitle">
+            SIV helps founders understand whether an idea deserves refinement, testing,
+            or execution by turning rough inputs into clear visual reasoning.
+          </p>
+        </div>
+
+        <div className="siv-workflow-card cyber-card cyber-corner-cut">
+          <div className="cyber-grid-lines" />
+          <div className="cyber-noise" />
+          <div className="cyber-card-inner">
+            <div className="siv-workflow-model">
+              <div className="siv-node">1. Input</div>
+              <div className="siv-arrow">→</div>
+              <div className="siv-node">2. Analyze</div>
+              <div className="siv-arrow">→</div>
+              <div className="siv-node">3. Score</div>
+              <div className="siv-arrow">→</div>
+              <div className="siv-node">4. Decide</div>
+            </div>
+
+            <div className="cyber-divider" />
+            <InsightList items={analysis.workflow} />
           </div>
+          <div className="cyber-holo-line" />
+        </div>
+      </section>
 
-          <div className="sa-workflow-card cyber-card cyber-corner-cut">
+      <section className="siv-main-grid">
+        <div className="siv-input-column">
+          <article className="cyber-panel cyber-corner-cut">
             <div className="cyber-grid-lines" />
             <div className="cyber-noise" />
-            <div className="cyber-card-inner">
-              <div className="sa-workflow-model">
-                <div className="sa-node">Input</div>
-                <div className="sa-arrow">→</div>
-                <div className="sa-node">Evaluate</div>
-                <div className="sa-arrow">→</div>
-                <div className="sa-node">Model</div>
-                <div className="sa-arrow">→</div>
-                <div className="sa-node">Decide</div>
-              </div>
+            <div className="cyber-panel-inner">
+              <div className="cyber-section-title">Input Console</div>
+              <p className="cyber-muted">
+                Paste your SaaS idea below or upload a file for stronger validation context.
+              </p>
+
               <div className="cyber-divider" />
-              <InsightList items={analysis.workflow} />
+
+              <textarea
+                className="cyber-textarea"
+                placeholder="Example: An AI tool that helps solo founders validate SaaS ideas, compare pricing angles, and generate launch-ready action steps..."
+                value={idea}
+                onChange={(event) => setIdea(event.target.value)}
+              />
+
+              <div
+                className={`siv-dropzone ${dragActive ? "is-active" : ""}`}
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  setDragActive(true);
+                }}
+                onDragLeave={() => setDragActive(false)}
+                onDrop={onDrop}
+              >
+                <input
+                  id="siv-file-upload"
+                  type="file"
+                  className="siv-file-input"
+                  onChange={(event) => handleFile(event.target.files?.[0])}
+                />
+                <label htmlFor="siv-file-upload" className="siv-dropzone-label">
+                  <span className="siv-dropzone-title">Drag and drop a file</span>
+                  <span className="siv-dropzone-text">
+                    or tap to upload notes, screenshots, PDFs, or research
+                  </span>
+                  {uploadedName ? (
+                    <span className="siv-uploaded-name">Uploaded: {uploadedName}</span>
+                  ) : null}
+                </label>
+              </div>
+
+              <div className="cyber-pill-row">
+                <button
+                  className="cyber-button"
+                  type="button"
+                  onClick={() => setSubmitted(true)}
+                >
+                  Enter Signal
+                </button>
+              </div>
             </div>
             <div className="cyber-holo-line" />
-          </div>
-        </section>
+          </article>
 
-        <section className="sa-main-grid">
-          <div className="sa-input-column">
-            <article className="cyber-panel cyber-corner-cut">
-              <div className="cyber-grid-lines" />
-              <div className="cyber-noise" />
-              <div className="cyber-panel-inner">
-                <div className="cyber-section-title">Evaluation Console</div>
-                <p className="cyber-muted">
-                  Enter your SaaS concept below and generate an evaluation signal with premium visual feedback.
-                </p>
-
-                <div className="cyber-divider" />
-
-                <div className="sa-input-shell">
-                  <div className="sa-input-glow" />
-                  <textarea
-                    className="sa-special-input"
-                    placeholder="Describe your SaaS idea, target customer, core pain point, pricing model, and why the market will care..."
-                    value={idea}
-                    onChange={(e) => setIdea(e.target.value)}
-                  />
-                </div>
-
-                <div className="cyber-pill-row">
-                  <button
-                    className="sa-luminous-button"
-                    type="button"
-                    onClick={() => setSubmitted(true)}
-                  >
-                    Enter Evaluation
-                  </button>
-                </div>
-              </div>
-              <div className="cyber-holo-line" />
-            </article>
-
-            {submitted && (
+          {submitted && (
+            <>
               <article className="cyber-chart cyber-corner-cut">
                 <div className="cyber-grid-lines" />
                 <div className="cyber-noise" />
                 <div className="cyber-chart-inner">
-                  <div className="cyber-section-title">Evaluation Response</div>
+                  <div className="cyber-section-title">Validation Response</div>
                   <p className="cyber-muted">
-                    Your score appears directly underneath the input to keep the decision flow focused.
+                    Your result appears directly underneath the input area to keep the workflow focused and easy to follow.
                   </p>
 
                   <div className="cyber-divider" />
 
-                  <div className="sa-score-grid">
-                    <div className="sa-score-panel">
-                      <div
-                        className="cyber-score-ring"
-                        style={{
-                          background: `radial-gradient(circle at center, rgba(5,8,22,0.95) 0 53%, transparent 54%), conic-gradient(var(--cyan) 0 ${analysis.score}%, rgba(255,255,255,0.08) ${analysis.score}% 100%)`,
-                        }}
-                      >
-                        <div className="cyber-score-value">
-                          {analysis.score}
-                          <span className="cyber-score-caption">Overall</span>
-                        </div>
+                  <div className="siv-score-summary">
+                    <div
+                      className="cyber-score-ring"
+                      style={{
+                        background: `radial-gradient(circle at center, rgba(5,8,22,0.95) 0 53%, transparent 54%), conic-gradient(var(--cyan) 0 ${analysis.score}%, rgba(255,255,255,0.08) ${analysis.score}% 100%)`,
+                      }}
+                    >
+                      <div className="cyber-score-value">
+                        {analysis.score}
+                        <span className="cyber-score-caption">Overall</span>
                       </div>
                     </div>
+                  </div>
 
-                    <div className="sa-bars-panel">
-                      <MetricBar label="Demand" value={analysis.demand} />
-                      <MetricBar label="Feasibility" value={analysis.feasibility} />
-                      <MetricBar label="Monetization" value={analysis.monetization} />
-                      <MetricBar label="Defensibility" value={analysis.moat} />
-                    </div>
+                  <div className="cyber-chart-bars">
+                    <MetricBar label="Demand" value={analysis.demand} />
+                    <MetricBar label="Feasibility" value={analysis.feasibility} />
+                    <MetricBar label="Monetization" value={analysis.monetization} />
+                    <MetricBar label="Defensibility" value={analysis.moat} />
                   </div>
 
                   <div className="cyber-divider" />
@@ -521,87 +709,198 @@ export default function HomePage() {
                 </div>
                 <div className="cyber-holo-line" />
               </article>
-            )}
-          </div>
 
-          <div className="sa-side-column">
-            <article className="cyber-card cyber-corner-cut">
-              <div className="cyber-grid-lines" />
-              <div className="cyber-noise" />
-              <div className="cyber-card-inner">
-                <div className="cyber-section-title">Evidence Layer</div>
-                <InsightList items={analysis.insights} />
-              </div>
-              <div className="cyber-holo-line" />
-            </article>
-          </div>
-        </section>
-
-        <section className="sa-pricing-section">
-          <div className="sa-pricing-head">
-            <div className="cyber-kicker">Pricing intelligence</div>
-            <h2 className="sa-section-display">Choose the evaluation depth that matches your stage.</h2>
-            <p className="cyber-subtitle">
-              The pricing architecture follows common SaaS practice: a clear 3-tier structure, transparent value,
-              and plan differentiation based on decision complexity.
-            </p>
-          </div>
-
-          <div className="sa-pricing-grid">
-            {PRICING_PLANS.map((plan) => (
-              <article
-                key={plan.name}
-                className={`sa-price-card cyber-card cyber-corner-cut ${plan.badge === "Most Popular" ? "is-featured" : ""}`}
-              >
+              <article className="cyber-card cyber-corner-cut siv-research-card">
                 <div className="cyber-grid-lines" />
                 <div className="cyber-noise" />
                 <div className="cyber-card-inner">
-                  <div className="sa-plan-badge">{plan.badge}</div>
-                  <h3 className="sa-plan-name">{plan.name}</h3>
-                  <div className="sa-plan-price">{plan.price}</div>
-                  <div className="sa-plan-subtext">{plan.subtext}</div>
+                  <div className="cyber-section-title">Scientific Scraping Model</div>
+                  <p className="cyber-muted">
+                    A JavaScript evidence-governance layer scores source quality, weights accepted evidence, and lowers confidence when the evidence is weak.
+                  </p>
 
                   <div className="cyber-divider" />
-                  <InsightList items={plan.features} />
+
+                  <div className="siv-model-stats">
+                    <div className="siv-model-stat">
+                      <strong>{researchModel.accepted.length}</strong>
+                      <span>Accepted</span>
+                    </div>
+                    <div className="siv-model-stat">
+                      <strong>{researchModel.rejected.length}</strong>
+                      <span>Rejected</span>
+                    </div>
+                    <div className="siv-model-stat">
+                      <strong>{researchModel.averageQuality}</strong>
+                      <span>Avg. Quality</span>
+                    </div>
+                    <div className="siv-model-stat">
+                      <strong>{researchModel.confidence}</strong>
+                      <span>Confidence</span>
+                    </div>
+                  </div>
 
                   <div className="cyber-divider" />
-                  <div className="sa-plan-stat-label">{plan.metric}</div>
-                  <p className="sa-plan-stat">{plan.stat}</p>
+
+                  <div className="siv-source-grid">
+                    {researchModel.accepted.concat(researchModel.rejected).map((source) => (
+                      <div key={source.source_id} className="siv-source-item">
+                        <div className="siv-source-top">
+                          <span className={`siv-source-badge ${source.quality_level.toLowerCase()}`}>
+                            {source.quality_level.replace("_", " ")}
+                          </span>
+                          <span className="siv-source-score">{source.quality_score}/100</span>
+                        </div>
+                        <div className="siv-source-title">{source.title}</div>
+                        <p className="cyber-muted">{source.reasoning}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="cyber-divider" />
+                  <p className="cyber-muted">{researchModel.recommendation}</p>
                 </div>
                 <div className="cyber-holo-line" />
               </article>
-            ))}
-          </div>
+            </>
+          )}
+        </div>
 
-          <div className="sa-benchmark-grid">
-            <article className="cyber-chart cyber-corner-cut">
+        <div className="siv-side-column">
+          <article className="cyber-card cyber-corner-cut">
+            <div className="cyber-grid-lines" />
+            <div className="cyber-noise" />
+            <div className="cyber-card-inner">
+              <div className="cyber-section-title">Why it is useful</div>
+              <InsightList items={analysis.insights} />
+            </div>
+            <div className="cyber-holo-line" />
+          </article>
+
+          <article className="cyber-card cyber-corner-cut siv-code-card">
+            <div className="cyber-grid-lines" />
+            <div className="cyber-noise" />
+            <div className="cyber-card-inner">
+              <div className="cyber-section-title">Embedded Research Prompt</div>
+              <pre className="siv-code-block">{RESEARCH_PROMPT}</pre>
+              <div className="cyber-divider" />
+              <div className="cyber-section-title">Evidence JSON Shape</div>
+              <pre className="siv-code-block">
+                {JSON.stringify(EVIDENCE_SCHEMA, null, 2)}
+              </pre>
+            </div>
+            <div className="cyber-holo-line" />
+          </article>
+        </div>
+      </section>
+
+      <section className="siv-pricing-section">
+        <div className="siv-explainer-copy">
+          <div className="cyber-kicker">SIV // Pricing Access</div>
+          <h2 className="siv-section-display">
+            Choose the tier that matches your validation speed.
+          </h2>
+          <p className="cyber-subtitle">
+            Start simple, go deeper when you need stronger comparisons, and scale up when several people need one evidence standard.
+          </p>
+        </div>
+
+        <div className="siv-pricing-grid">
+          {PRICING_TIERS.map((tier) => (
+            <article
+              key={tier.id}
+              className={`cyber-card cyber-corner-cut siv-tier-card ${
+                tier.id === "pro" ? "is-featured" : ""
+              }`}
+            >
               <div className="cyber-grid-lines" />
               <div className="cyber-noise" />
-              <div className="cyber-chart-inner">
-                <div className="cyber-section-title">Conversion Benchmarks</div>
-                <MetricBar label="Visitor → Trial" value={5} />
-                <MetricBar label="Trial → Paid" value={25} />
-                <MetricBar label="Freemium → Paid" value={5} />
+              <div className="cyber-card-inner">
+                <div className="siv-tier-badge">{tier.badge}</div>
+                <h3 className="siv-tier-name">{tier.name}</h3>
+                <div className="siv-tier-price">
+                  <span>{tier.price}</span>
+                  <small>{tier.period}</small>
+                </div>
+                <p className="cyber-muted">{tier.tagline}</p>
+                <div className="cyber-divider" />
+                <InsightList items={tier.features} />
+                <div className="cyber-pill-row">
+                  <button
+                    type="button"
+                    className="cyber-button"
+                    onClick={() => setSelectedTier(tier.id)}
+                  >
+                    {tier.cta}
+                  </button>
+                </div>
               </div>
               <div className="cyber-holo-line" />
             </article>
+          ))}
+        </div>
+      </section>
 
-            <article className="cyber-chart cyber-corner-cut">
-              <div className="cyber-grid-lines" />
-              <div className="cyber-noise" />
-              <div className="cyber-chart-inner">
-                <div className="cyber-section-title">Startup Risk Pattern</div>
-                <MetricBar label="Poor product-market fit" value={43} />
-                <MetricBar label="Bad timing" value={29} />
-                <MetricBar label="Unsustainable economics" value={19} />
+      {activeTier ? (
+        <div className="siv-modal-backdrop" onClick={() => setSelectedTier(null)}>
+          <div
+            className="siv-modal cyber-corner-cut"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="tier-modal-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="cyber-grid-lines" />
+            <div className="cyber-noise" />
+            <div className="siv-modal-inner">
+              <div className="siv-modal-top">
+                <div>
+                  <div className="siv-tier-badge">{activeTier.badge}</div>
+                  <h3 id="tier-modal-title" className="siv-tier-name">
+                    {activeTier.name}
+                  </h3>
+                </div>
+                <button
+                  ref={modalCloseRef}
+                  type="button"
+                  className="siv-modal-close"
+                  aria-label="Close pricing details"
+                  onClick={() => setSelectedTier(null)}
+                >
+                  ×
+                </button>
               </div>
-              <div className="cyber-holo-line" />
-            </article>
-          </div>
-        </section>
-      </main>
 
-      <MobileDiagramModal item={activeDiagram} onClose={() => setActiveDiagram(null)} />
-    </>
+              <div className="siv-tier-price">
+                <span>{activeTier.price}</span>
+                <small>{activeTier.period}</small>
+              </div>
+
+              <p className="cyber-muted">{activeTier.tagline}</p>
+
+              <div className="cyber-divider" />
+
+              <div className="siv-modal-grid">
+                <div>
+                  <div className="cyber-section-title">Included</div>
+                  <InsightList items={activeTier.features} />
+                </div>
+                <div>
+                  <div className="cyber-section-title">Best for</div>
+                  <InsightList items={activeTier.details} />
+                </div>
+              </div>
+
+              <div className="cyber-pill-row">
+                <button type="button" className="cyber-button">
+                  {activeTier.cta}
+                </button>
+              </div>
+            </div>
+            <div className="cyber-holo-line" />
+          </div>
+        </div>
+      ) : null}
+    </main>
   );
 }
