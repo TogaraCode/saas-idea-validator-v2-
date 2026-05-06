@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const HERO_SLIDES = [
   {
@@ -17,362 +17,12 @@ const HERO_SLIDES = [
   },
 ];
 
-const PRICING_TIERS = [
-  {
-    id: "starter",
-    name: "Starter",
-    price: "€19",
-    period: "/month",
-    badge: "For solo founders",
-    tagline: "Validate one idea with strong structure and clear next steps.",
-    features: [
-      "1 active validation workspace",
-      "Core scoring model",
-      "Source quality checklist",
-      "Action-oriented idea guidance",
-    ],
-    details: [
-      "Designed for solo founders testing one promising concept at a time.",
-      "Good fit when you need a structured signal before spending weeks building.",
-      "Includes the quality-control model so evidence is weighted, not guessed.",
-    ],
-    cta: "Start Starter",
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    price: "€49",
-    period: "/month",
-    badge: "Most popular",
-    tagline: "Compare ideas, score evidence, and move from signal to decision faster.",
-    features: [
-      "10 active validation workspaces",
-      "Evidence weighting engine",
-      "Decision matrix and confidence scoring",
-      "Pricing and positioning comparison support",
-    ],
-    details: [
-      "Built for active founders refining multiple SaaS opportunities.",
-      "Useful when monetization, feasibility, and defensibility need deeper review.",
-      "Best plan for going from rough concepts to a more investment-worthy thesis.",
-    ],
-    cta: "Choose Pro",
-  },
-  {
-    id: "team",
-    name: "Team",
-    price: "€99",
-    period: "/month",
-    badge: "For teams",
-    tagline:
-      "Run collaborative validation workflows across several ideas and stakeholders.",
-    features: [
-      "Unlimited workspaces",
-      "Shared review logic",
-      "Priority support",
-      "Team-ready evidence audit trails",
-    ],
-    details: [
-      "Made for cofounders, studios, and small product teams evaluating several bets.",
-      "Helps keep research quality consistent across team members.",
-      "Adds process discipline when decisions need to be defensible later.",
-    ],
-    cta: "Talk to sales",
-  },
-];
-
-const RESEARCH_PROMPT = `You are operating as a Scientific Research, Verification, and Decision Intelligence System.
-
-Your primary objective is not speed.
-Your primary objective is to gather the most reliable, evidence-based, scientifically valid, and decision-relevant information possible.
-
-Prioritize:
-- Accuracy
-- Reliability
-- Scientific rigor
-- Verifiable evidence
-- Transparency
-- Data quality
-- Trustworthiness
-- Reproducibility
-
-Source priority hierarchy:
-Tier 1: peer-reviewed journals, meta-analyses, systematic reviews, government datasets, scientific institutions.
-Tier 2: established industry reports, public company filings, large-scale surveys, research organizations.
-Tier 3: major news organizations, expert interviews, verified case studies, reputable blogs with citations.
-Tier 4: anecdotal reports, opinion pieces, social media claims, marketing material.
-
-For every source, evaluate scientific validity, source reliability, data quality, and decision relevance. Score each true criterion with +1 and compute:
-Quality Score = (True Answers / Total Questions) * 100.
-
-Thresholds:
-90-100 = HIGH TRUST
-75-89 = MODERATE TRUST
-60-74 = LOW TRUST
-Below 60 = REJECTED
-
-If evidence is weak, disclose limitations clearly and reduce confidence accordingly.`;
-
-const EVIDENCE_SCHEMA = {
-  source_id: "string",
-  source_type:
-    "peer_reviewed_journal | meta_analysis | systematic_review | government_data | company_filing | industry_report | news | blog | social_media | other",
-  title: "string",
-  authors_or_institution: ["string"],
-  publication_date: "ISO_8601_string",
-  methodology: "string",
-  sample_size: {
-    value: 0,
-    unit: "participants | companies | documents | null",
-  },
-  funding_or_conflicts: "string | null",
-  geographic_relevance: "string",
-  quality_checklist: {
-    scientific_validity: {
-      peer_reviewed_or_audited: false,
-      methodology_transparent: false,
-      sample_size_meaningful: false,
-      conclusions_supported_by_: false,
-      confidence_intervals_or_significance: false,
-      causal_claims_justified: false,
-      reproducible: false,
-      limitations_acknowledged: false,
-    },
-    source_reliability: {
-      institution_reputable: false,
-      authors_qualified: false,
-      bias_or_conflict_indicated: false,
-      independently_corroborated: false,
-      widely_cited_or_referenced: false,
-      recent_enough: false,
-    },
-    data_quality: {
-      statistics_consistent: false,
-      calculations_valid: false,
-      datasets_complete: false,
-      assumptions_stated: false,
-      uncertainty_quantified: false,
-    },
-    decision_relevance: {
-      directly_relevant: false,
-      improves_decision_quality: false,
-      actionable_insight: false,
-      improves_confidence: false,
-    },
-  },
-  total_true_answers: 0,
-  quality_score: 0,
-  quality_level: "REJECTED",
-  reasoning: "string",
-};
-
 function clampValue(value) {
   return Math.max(0, Math.min(100, value));
 }
 
-function scoreEvidenceSource(source) {
-  const sections = Object.values(source.quality_checklist || {});
-  const values = sections.flatMap((section) => Object.values(section));
-  const trueAnswers = values.filter(Boolean).length;
-  const totalQuestions = values.length || 1;
-  const qualityScore = Math.round((trueAnswers / totalQuestions) * 100);
-
-  let qualityLevel = "REJECTED";
-  if (qualityScore >= 90) qualityLevel = "HIGH_TRUST";
-  else if (qualityScore >= 75) qualityLevel = "MODERATE_TRUST";
-  else if (qualityScore >= 60) qualityLevel = "LOW_TRUST";
-
-  return {
-    ...source,
-    total_true_answers: trueAnswers,
-    quality_score: qualityScore,
-    quality_level: qualityLevel,
-  };
-}
-
-function buildResearchModelPreview(idea, uploadedName) {
-  const normalized = idea.trim().toLowerCase();
-  const hasText = normalized.length > 20;
-  const hasFile = Boolean(uploadedName);
-
-  const sources = [
-    {
-      source_id: "demo-systematic-review",
-      source_type: "systematic_review",
-      title: "Comparable domain review",
-      authors_or_institution: ["Independent research group"],
-      publication_date: "2025-02-01",
-      methodology: "systematic review",
-      sample_size: { value: 42, unit: "documents" },
-      funding_or_conflicts: "None disclosed",
-      geographic_relevance: "global",
-      quality_checklist: {
-        scientific_validity: {
-          peer_reviewed_or_audited: true,
-          methodology_transparent: true,
-          sample_size_meaningful: true,
-          conclusions_supported_by_: true,
-          confidence_intervals_or_significance: true,
-          causal_claims_justified: false,
-          reproducible: true,
-          limitations_acknowledged: true,
-        },
-        source_reliability: {
-          institution_reputable: true,
-          authors_qualified: true,
-          bias_or_conflict_indicated: true,
-          independently_corroborated: true,
-          widely_cited_or_referenced: true,
-          recent_enough: true,
-        },
-        data_quality: {
-          statistics_consistent: true,
-          calculations_valid: true,
-          datasets_complete: true,
-          assumptions_stated: true,
-          uncertainty_quantified: true,
-        },
-        decision_relevance: {
-          directly_relevant: hasText,
-          improves_decision_quality: true,
-          actionable_insight: true,
-          improves_confidence: true,
-        },
-      },
-      reasoning:
-        "High-quality evidence with transparent methods and clear decision relevance.",
-    },
-    {
-      source_id: "demo-industry-report",
-      source_type: "industry_report",
-      title: "Market report with pricing and category benchmarks",
-      authors_or_institution: ["Established research publisher"],
-      publication_date: "2025-09-10",
-      methodology: "industry survey",
-      sample_size: { value: 1200, unit: "companies" },
-      funding_or_conflicts: "Commercial publisher",
-      geographic_relevance: "EU/US",
-      quality_checklist: {
-        scientific_validity: {
-          peer_reviewed_or_audited: false,
-          methodology_transparent: true,
-          sample_size_meaningful: true,
-          conclusions_supported_by_: true,
-          confidence_intervals_or_significance: false,
-          causal_claims_justified: false,
-          reproducible: false,
-          limitations_acknowledged: true,
-        },
-        source_reliability: {
-          institution_reputable: true,
-          authors_qualified: true,
-          bias_or_conflict_indicated: true,
-          independently_corroborated: hasFile,
-          widely_cited_or_referenced: true,
-          recent_enough: true,
-        },
-        data_quality: {
-          statistics_consistent: true,
-          calculations_valid: true,
-          datasets_complete: true,
-          assumptions_stated: true,
-          uncertainty_quantified: false,
-        },
-        decision_relevance: {
-          directly_relevant: true,
-          improves_decision_quality: true,
-          actionable_insight: true,
-          improves_confidence: true,
-        },
-      },
-      reasoning:
-        "Useful decision support evidence, but with weaker reproducibility than academic research.",
-    },
-    {
-      source_id: "demo-blog-post",
-      source_type: "blog",
-      title: "Founder commentary and anecdotal market observations",
-      authors_or_institution: ["Independent operator"],
-      publication_date: "2026-01-12",
-      methodology: "anecdotal post",
-      sample_size: { value: null, unit: null },
-      funding_or_conflicts: "Unknown",
-      geographic_relevance: "unknown",
-      quality_checklist: {
-        scientific_validity: {
-          peer_reviewed_or_audited: false,
-          methodology_transparent: false,
-          sample_size_meaningful: false,
-          conclusions_supported_by_: false,
-          confidence_intervals_or_significance: false,
-          causal_claims_justified: false,
-          reproducible: false,
-          limitations_acknowledged: false,
-        },
-        source_reliability: {
-          institution_reputable: false,
-          authors_qualified: false,
-          bias_or_conflict_indicated: false,
-          independently_corroborated: false,
-          widely_cited_or_referenced: false,
-          recent_enough: true,
-        },
-        data_quality: {
-          statistics_consistent: false,
-          calculations_valid: false,
-          datasets_complete: false,
-          assumptions_stated: false,
-          uncertainty_quantified: false,
-        },
-        decision_relevance: {
-          directly_relevant: normalized.includes("founder"),
-          improves_decision_quality: false,
-          actionable_insight: normalized.length > 80,
-          improves_confidence: false,
-        },
-      },
-      reasoning:
-        "Low-rigor directional context only; should not drive the main recommendation.",
-    },
-  ].map(scoreEvidenceSource);
-
-  const accepted = sources.filter(
-    (source) => source.quality_level !== "REJECTED"
-  );
-
-  const averageQuality = accepted.length
-    ? Math.round(
-        accepted.reduce((sum, source) => sum + source.quality_score, 0) /
-          accepted.length
-      )
-    : 0;
-
-  const confidence = clampValue(
-    Math.round(
-      averageQuality * 0.7 +
-        (hasText ? 12 : 0) +
-        (hasFile ? 10 : 0) +
-        Math.min(normalized.length / 10, 8)
-    )
-  );
-
-  return {
-    accepted,
-    rejected: sources.filter((source) => source.quality_level === "REJECTED"),
-    averageQuality,
-    confidence,
-    recommendation:
-      confidence >= 80
-        ? "High-confidence direction: continue validating demand and test pricing with real users."
-        : confidence >= 60
-          ? "Moderate-confidence direction: strengthen primary evidence before committing to build."
-          : "Low-confidence direction: collect stronger Tier 1 and Tier 2 evidence before deciding.",
-  };
-}
-
 function MetricBar({ label, value }) {
   const safe = clampValue(value);
-
   return (
     <div className="cyber-bar-row">
       <div className="cyber-bar-top">
@@ -399,29 +49,6 @@ function InsightList({ items }) {
   );
 }
 
-function SourceCard({ source }) {
-  return (
-    <article className="cyber-card cyber-corner-cut source-card">
-      <div className="cyber-card-inner">
-        <div className="source-card__header">
-          <div>
-            <p className="cyber-kicker">{source.source_type.replaceAll("_", " ")}</p>
-            <h3>{source.title}</h3>
-          </div>
-          <div className={`source-badge source-badge--${source.quality_level.toLowerCase()}`}>
-            {source.quality_level.replaceAll("_", " ")}
-          </div>
-        </div>
-        <p className="source-meta">
-          {source.authors_or_institution.join(", ")} · {source.publication_date}
-        </p>
-        <p className="source-reasoning">{source.reasoning}</p>
-        <MetricBar label="Quality score" value={source.quality_score} />
-      </div>
-    </article>
-  );
-}
-
 export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
@@ -430,8 +57,6 @@ export default function HomePage() {
   const [dragActive, setDragActive] = useState(false);
   const [uploadedName, setUploadedName] = useState("");
   const [autoplayPaused, setAutoplayPaused] = useState(false);
-  const [selectedTier, setSelectedTier] = useState(null);
-  const modalCloseRef = useRef(null);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -443,27 +68,6 @@ export default function HomePage() {
 
     return () => clearInterval(timer);
   }, [autoplayPaused]);
-
-  useEffect(() => {
-    if (!selectedTier) return undefined;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    modalCloseRef.current?.focus();
-
-    function handleKeyDown(event) {
-      if (event.key === "Escape") {
-        setSelectedTier(null);
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [selectedTier]);
 
   const analysis = useMemo(() => {
     const text = idea.trim().toLowerCase();
@@ -508,29 +112,18 @@ export default function HomePage() {
     };
   }, [idea, uploadedName]);
 
-  const researchModel = useMemo(
-    () => buildResearchModelPreview(idea, uploadedName),
-    [idea, uploadedName]
-  );
-
   const currentSlide = HERO_SLIDES[activeSlide];
-  const activeTier = PRICING_TIERS.find((tier) => tier.id === selectedTier);
 
   function handleFile(file) {
     if (!file) return;
     setUploadedName(file.name);
   }
 
-  function onDrop(event) {
-    event.preventDefault();
+  function onDrop(e) {
+    e.preventDefault();
     setDragActive(false);
-    const file = event.dataTransfer.files?.[0];
+    const file = e.dataTransfer.files?.[0];
     handleFile(file);
-  }
-
-  function onSubmit(event) {
-    event.preventDefault();
-    setSubmitted(true);
   }
 
   return (
@@ -564,21 +157,11 @@ export default function HomePage() {
           className={`siv-drawer ${menuOpen ? "is-open" : ""}`}
           aria-hidden={!menuOpen}
         >
-          <button type="button" className="siv-drawer-link">
-            Login
-          </button>
-          <button type="button" className="siv-drawer-link">
-            Logout
-          </button>
-          <button type="button" className="siv-drawer-link">
-            Toggle My Projects
-          </button>
-          <button type="button" className="siv-drawer-link">
-            Account
-          </button>
-          <button type="button" className="siv-drawer-link">
-            Settings
-          </button>
+          <button type="button" className="siv-drawer-link">Login</button>
+          <button type="button" className="siv-drawer-link">Logout</button>
+          <button type="button" className="siv-drawer-link">Toggle My Projects</button>
+          <button type="button" className="siv-drawer-link">Account</button>
+          <button type="button" className="siv-drawer-link">Settings</button>
         </aside>
       </header>
 
@@ -631,9 +214,8 @@ export default function HomePage() {
             Validate SaaS ideas with a neon-fast decision workflow.
           </h1>
           <p className="cyber-subtitle">
-            SIV helps founders understand whether an idea deserves refinement,
-            testing, or execution by turning rough inputs into clear visual
-            reasoning.
+            SIV helps founders understand whether an idea deserves refinement, testing,
+            or execution by turning rough inputs into clear visual reasoning.
           </p>
         </div>
 
@@ -650,187 +232,126 @@ export default function HomePage() {
               <div className="siv-arrow">→</div>
               <div className="siv-node">4. Decide</div>
             </div>
+
+            <div className="cyber-divider" />
             <InsightList items={analysis.workflow} />
           </div>
+          <div className="cyber-holo-line" />
         </div>
       </section>
 
-      <section className="siv-lab-grid">
-        <form className="cyber-card cyber-corner-cut siv-input-panel" onSubmit={onSubmit}>
-          <div className="cyber-grid-lines" />
-          <div className="cyber-card-inner">
-            <div className="cyber-kicker">Idea intake</div>
-            <h2>Describe the SaaS idea you want to validate</h2>
-            <textarea
-              value={idea}
-              onChange={(event) => setIdea(event.target.value)}
-              placeholder="Example: An AI workflow assistant for small B2B sales teams that scores inbound leads and drafts outreach."
-              className="siv-textarea"
-              rows={8}
-            />
+      <section className="siv-main-grid">
+        <div className="siv-input-column">
+          <article className="cyber-panel cyber-corner-cut">
+            <div className="cyber-grid-lines" />
+            <div className="cyber-noise" />
+            <div className="cyber-panel-inner">
+              <div className="cyber-section-title">Input Console</div>
+              <p className="cyber-muted">
+                Paste your SaaS idea below or upload a file for stronger validation context.
+              </p>
 
-            <label
-              className={`siv-upload-zone ${dragActive ? "is-dragging" : ""}`}
-              onDragOver={(event) => {
-                event.preventDefault();
-                setDragActive(true);
-              }}
-              onDragLeave={() => setDragActive(false)}
-              onDrop={onDrop}
-            >
-              <input
-                type="file"
-                className="sr-only"
-                onChange={(event) => handleFile(event.target.files?.[0])}
+              <div className="cyber-divider" />
+
+              <textarea
+                className="cyber-textarea"
+                placeholder="Example: An AI tool that helps solo founders validate SaaS ideas, compare pricing angles, and generate launch-ready action steps..."
+                value={idea}
+                onChange={(e) => setIdea(e.target.value)}
               />
-              <span className="siv-upload-title">Drop a brief, screenshot, or notes file</span>
-              <span className="siv-upload-copy">
-                {uploadedName ? `Attached: ${uploadedName}` : "PDF, TXT, PNG, or JPG supported for context preview."}
-              </span>
-            </label>
 
-            <div className="siv-actions-row">
-              <button type="submit" className="cyber-button primary">
-                Run validation preview
-              </button>
-              <button
-                type="button"
-                className="cyber-button secondary"
-                onClick={() => {
-                  setIdea("");
-                  setUploadedName("");
-                  setSubmitted(false);
+              <div
+                className={`siv-dropzone ${dragActive ? "is-active" : ""}`}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setDragActive(true);
                 }}
+                onDragLeave={() => setDragActive(false)}
+                onDrop={onDrop}
               >
-                Reset
-              </button>
-            </div>
-          </div>
-        </form>
+                <input
+                  id="siv-file-upload"
+                  type="file"
+                  className="siv-file-input"
+                  onChange={(e) => handleFile(e.target.files?.[0])}
+                />
+                <label htmlFor="siv-file-upload" className="siv-dropzone-label">
+                  <span className="siv-dropzone-title">Drag and drop a file</span>
+                  <span className="siv-dropzone-text">
+                    or tap to upload notes, screenshots, PDFs, or research
+                  </span>
+                  {uploadedName ? (
+                    <span className="siv-uploaded-name">Uploaded: {uploadedName}</span>
+                  ) : null}
+                </label>
+              </div>
 
-        <section className="cyber-card cyber-corner-cut siv-score-panel" aria-live="polite">
-          <div className="cyber-grid-lines" />
-          <div className="cyber-card-inner">
-            <div className="cyber-kicker">Validation score</div>
-            <div className="siv-score-orb">
-              <span>{submitted ? analysis.score : 0}</span>
-              <small>Score</small>
-            </div>
-            <div className="siv-metrics-stack">
-              <MetricBar label="Demand" value={submitted ? analysis.demand : 0} />
-              <MetricBar label="Moat" value={submitted ? analysis.moat : 0} />
-              <MetricBar label="Feasibility" value={submitted ? analysis.feasibility : 0} />
-              <MetricBar label="Monetization" value={submitted ? analysis.monetization : 0} />
-            </div>
-            <InsightList items={submitted ? analysis.insights : ["Submit an idea to generate insight highlights."]} />
-          </div>
-        </section>
-      </section>
-
-      <section className="siv-research-grid">
-        <article className="cyber-card cyber-corner-cut">
-          <div className="cyber-card-inner">
-            <div className="cyber-kicker">Research protocol</div>
-            <h2>Evidence-first scoring model</h2>
-            <p className="cyber-body">
-              The preview simulates how SIV weights stronger evidence higher and rejects low-trust material before it shapes a decision.
-            </p>
-            <pre className="siv-code-block">{RESEARCH_PROMPT}</pre>
-          </div>
-        </article>
-
-        <article className="cyber-card cyber-corner-cut">
-          <div className="cyber-card-inner">
-            <div className="cyber-kicker">Confidence model</div>
-            <h2>Decision readiness</h2>
-            <MetricBar label="Average accepted quality" value={researchModel.averageQuality} />
-            <MetricBar label="Decision confidence" value={researchModel.confidence} />
-            <p className="cyber-body">{researchModel.recommendation}</p>
-            <div className="siv-schema-note">
-              <strong>Schema fields:</strong> {Object.keys(EVIDENCE_SCHEMA).join(", ")}
-            </div>
-          </div>
-        </article>
-      </section>
-
-      <section className="siv-source-grid">
-        <div className="siv-section-heading">
-          <div className="cyber-kicker">Accepted evidence</div>
-          <h2>Preview of trusted inputs</h2>
-        </div>
-        <div className="siv-source-cards">
-          {researchModel.accepted.map((source) => (
-            <SourceCard key={source.source_id} source={source} />
-          ))}
-        </div>
-      </section>
-
-      <section className="siv-pricing-section">
-        <div className="siv-section-heading">
-          <div className="cyber-kicker">Pricing</div>
-          <h2>Pick the right validation cadence</h2>
-        </div>
-        <div className="siv-pricing-grid">
-          {PRICING_TIERS.map((tier) => (
-            <article key={tier.id} className="cyber-card cyber-corner-cut pricing-card">
-              <div className="cyber-card-inner">
-                <div className="pricing-card__top">
-                  <span className="pricing-badge">{tier.badge}</span>
-                  <h3>{tier.name}</h3>
-                  <p className="pricing-price">
-                    {tier.price}
-                    <span>{tier.period}</span>
-                  </p>
-                </div>
-                <p className="pricing-tagline">{tier.tagline}</p>
-                <InsightList items={tier.features} />
+              <div className="cyber-pill-row">
                 <button
+                  className="cyber-button"
                   type="button"
-                  className="cyber-button primary"
-                  onClick={() => setSelectedTier(tier.id)}
+                  onClick={() => setSubmitted(true)}
                 >
-                  {tier.cta}
+                  Enter Signal
                 </button>
               </div>
+            </div>
+            <div className="cyber-holo-line" />
+          </article>
+
+          {submitted && (
+            <article className="cyber-chart cyber-corner-cut">
+              <div className="cyber-grid-lines" />
+              <div className="cyber-noise" />
+              <div className="cyber-chart-inner">
+                <div className="cyber-section-title">Validation Response</div>
+                <p className="cyber-muted">
+                  Your result appears directly underneath the input area to keep the workflow focused and easy to follow.
+                </p>
+
+                <div className="cyber-divider" />
+
+                <div className="siv-score-summary">
+                  <div
+                    className="cyber-score-ring"
+                    style={{
+                      background: `radial-gradient(circle at center, rgba(5,8,22,0.95) 0 53%, transparent 54%), conic-gradient(var(--cyan) 0 ${analysis.score}%, rgba(255,255,255,0.08) ${analysis.score}% 100%)`,
+                    }}
+                  >
+                    <div className="cyber-score-value">
+                      {analysis.score}
+                      <span className="cyber-score-caption">Overall</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="cyber-chart-bars">
+                  <MetricBar label="Demand" value={analysis.demand} />
+                  <MetricBar label="Feasibility" value={analysis.feasibility} />
+                  <MetricBar label="Monetization" value={analysis.monetization} />
+                  <MetricBar label="Defensibility" value={analysis.moat} />
+                </div>
+
+                <div className="cyber-divider" />
+                <InsightList items={analysis.actions} />
+              </div>
+              <div className="cyber-holo-line" />
             </article>
-          ))}
+          )}
+        </div>
+
+        <div className="siv-side-column">
+          <article className="cyber-card cyber-corner-cut">
+            <div className="cyber-grid-lines" />
+            <div className="cyber-noise" />
+            <div className="cyber-card-inner">
+              <div className="cyber-section-title">Why it is useful</div>
+              <InsightList items={analysis.insights} />
+            </div>
+            <div className="cyber-holo-line" />
+          </article>
         </div>
       </section>
-
-      {activeTier ? (
-        <div className="siv-modal-backdrop" role="presentation" onClick={() => setSelectedTier(null)}>
-          <section
-            className="siv-modal cyber-card cyber-corner-cut"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="tier-modal-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="cyber-card-inner">
-              <div className="siv-modal-header">
-                <div>
-                  <div className="cyber-kicker">Plan details</div>
-                  <h2 id="tier-modal-title">{activeTier.name}</h2>
-                </div>
-                <button
-                  ref={modalCloseRef}
-                  type="button"
-                  className="siv-modal-close"
-                  aria-label="Close plan details"
-                  onClick={() => setSelectedTier(null)}
-                >
-                  ×
-                </button>
-              </div>
-              <p className="pricing-tagline">{activeTier.tagline}</p>
-              <InsightList items={activeTier.details} />
-              <button type="button" className="cyber-button primary">
-                {activeTier.cta}
-              </button>
-            </div>
-          </section>
-        </div>
-      ) : null}
     </main>
   );
 }
